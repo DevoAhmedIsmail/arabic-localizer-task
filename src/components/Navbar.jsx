@@ -2,9 +2,7 @@ import React, { useEffect, useState } from "react";
 import { MdNotificationsActive } from "react-icons/md";
 import Badge from "./Badge";
 import { IoIosArrowDown } from "react-icons/io";
-import { AiOutlineMenu } from "react-icons/ai";
 
-import personImage from "../assets/persons/cheerful-curly-business-girl-wearing-glasses.jpg";
 
 const Navbar = () => {
   const [currentTime, setCurrentTime] = useState(new Date());

@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useState } from "react";
 import nextId from "react-id-generator";
 export const EmployeeContext = createContext();
 

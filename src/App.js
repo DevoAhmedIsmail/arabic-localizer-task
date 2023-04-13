@@ -1,6 +1,4 @@
-import { useContext, useEffect } from "react";
 import "./App.css";
-import { EmployeeContext } from "./context/EmployeeProvider";
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 import ListContainer from "./components/ListContainer";
