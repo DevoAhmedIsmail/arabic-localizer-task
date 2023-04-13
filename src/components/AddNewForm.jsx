@@ -1,52 +1,125 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import ModalTitle from "./ModalTitle";
 import Button from "./Button";
+import { EmployeeContext } from "../context/EmployeeProvider";
+import { SelectInput } from "./Inputs";
+import ErrorSpan from "./ErrorSpan";
 
-const AddNewForm = ({closeModal}) => {
-  const [isDragging, setIsDragging] = useState(false);
+const AddNewForm = ({ closeModal }) => {
+  const [name, setName] = useState("");
+  const [position, setPosition] = useState("");
+  const [department, setDepartment] = useState("");
+  const [attendance, setAttendance] = useState("");
+  const [office, setOffice] = useState("");
+  const [role, setRole] = useState("");
+  const [copiedManager, setCopiedManager] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [manager, setManager] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [image, setimage] = useState("");
+  const [errors, setErrors] = useState({});
 
-  function handleDragEnter(e) {
-    e.preventDefault();
-    setIsDragging(true);
+  // to store image which come form user
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const { addEmployee } = useContext(EmployeeContext);
+
+  // Validations
+  function validateForm() {
+    let errors = {};
+    if (!name) {
+      errors.name = "Name is required";
+    }
+    if (!email) {
+      errors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      errors.email = "Email is invalid";
+    }
+    if (!phone) {
+      errors.phone = "Phone is required";
+    } else if (!/^\d{10}$/) {
+      errors.phone = "Phone is invalid";
+    }
+    if (!position) {
+      errors.position = "Position is required";
+    }
+    if (!department) {
+      errors.department = "Department is required";
+    }
+    if (!attendance) {
+      errors.attendance = "Attendance is required";
+    }
+    if (!office) {
+      errors.office = "Office is required";
+    }
+    if (!role) {
+      errors.role = "Role is required";
+    }
+    if (!startDate) {
+      errors.startDate = "Start Date is required";
+    }
+    if (!manager) {
+      errors.manager = "Manager is required";
+    }
+
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
   }
 
-  function handleDragLeave(e) {
-    e.preventDefault();
-    setIsDragging(false);
-  }
+  // Handle Image come from user
+  const handleImageUpload = (event) => {
+    const imageFile = event.target.files[0];
+    setSelectedImage(imageFile);
+    setimage(URL.createObjectURL(imageFile));
+  };
 
-  function handleDragOver(e) {
+  // Submit Form
+  function handleSubmit(e) {
     e.preventDefault();
-  }
+    if (validateForm()) {
+      // console.log('Form submitted:', { name, email, phone });
+      // Do something with the form data
+      addEmployee({
+        name,
+        position,
+        role,
+        department,
+        attendance,
+        office,
+        startDate,
+        manager,
+        image,
+      });
 
-  function handleDrop(e) {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    console.log("File dropped:", file);
+      closeModal();
+    }
   }
 
   const wrapperRef = useRef(null);
   useEffect(() => {
-      const handleClickOutside = (event) => {
-        if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-            closeModal()
-        }
-      };
-  
-      document.addEventListener('mousedown', handleClickOutside);
-  
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-      };
-    }, [wrapperRef]);
+    const handleClickOutside = (event) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        closeModal();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [wrapperRef]);
 
   return (
     <div
       className="absolute top-0 left-0 w-full min-h-screen z-30 flex justify-center items-center"
       style={{ backgroundColor: "rgba(40, 104, 174, 0.43)" }}
     >
-      <div className="bg-white p-5  w-[90%] md:w-[700px] lg:w-[1000px] overflow-auto" ref={wrapperRef}>
+      <div
+        className="bg-white p-5  w-[90%] md:w-[700px] lg:w-[1000px] overflow-auto"
+        ref={wrapperRef}
+      >
         <div className="border-b-2 border-[#23aaeb]  pb-3">
           <p className="text-[#23aaeb] font-[Roboto] text-[18px]">
             NEW EMPLOYEE
@@ -54,54 +127,66 @@ const AddNewForm = ({closeModal}) => {
         </div>
 
         <div className="">
-          <form>
+          <form onSubmit={(e) => handleSubmit(e)}>
             <ModalTitle text="Personal Info" />
             <div className="grid grid-cols-12 gap-6 items-center">
-              {/* Drop Box */}
-              <div
-                className="col-start-1 col-end-13 md:col-end-4"
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-              >
-                <div
-                  className={`box box-drag border-2 ${
-                    isDragging ? "border-solid" : "border-dotted"
-                  }`}
-                >
-                  <span className="text-[13px] font-bold text-center text-[#5c6974] font-[Roboto] tracking-[1.73px]">
-                    {isDragging ? "Drop The image" : "DRAG IMAGE HERE"}
-                  </span>
-                </div>
+              <div className="col-start-1 col-end-13 md:col-end-4 relative">
+                <input
+                  id="image-upload"
+                  type="file"
+                  onChange={handleImageUpload}
+                />
+
+                <label htmlFor="image-upload">
+                  <div className={`box box-drag border-2 }`}>
+                    <span className={`w-full h-full text-[13px] font-bold text-center text-[#5c6974] font-[Roboto] tracking-[1.73px] ${!image && 'absolute top-[43%] translate-y-0'}`}>
+                      {image ? <img src={image} alt="user" className="w-full h-full object-contain" /> : "DRAG IMAGE HERE"}
+                    </span>
+                  </div>
+                </label>
               </div>
-              {/*End Drop Box */}
               {/* Inputs */}
               <div className="col-start-1 md:col-start-4 col-end-13">
                 <div className="flex justify-between items-center flex-wrap">
-                  <div className="w-1/2 flex flex-col px-4 mb-2">
+                  <div className="w-1/2 flex flex-col px-4 mb-4 relative">
                     <label className="text-[#313030] text-[13px]">Name</label>
-                    <input className="border border-[#aaaaaad6] focus:outline-[#aaaaaad6] h-[30px] px-3 text-[13px] rounded" />
+                    <input
+                      className="border border-[#aaaaaad6] focus:outline-[#aaaaaad6] h-[30px] px-3 text-[13px] rounded"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                    {errors.name && <ErrorSpan text={errors.name} />}
                   </div>
-                  <div className="w-1/2 flex flex-col px-4 mb-2">
+                  <div className="w-1/2 flex flex-col px-4 mb-4 relative">
                     <label className="text-[#313030] text-[13px]">
                       Start Date
                     </label>
                     <input
                       type="date"
                       className="border border-[#aaaaaad6] focus:outline-[#aaaaaad6] h-[30px] px-3 text-[13px] rounded"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
                     />
+                    {errors.startDate && <ErrorSpan text={errors.startDate} />}
                   </div>
-                  <div className="w-1/2 flex flex-col px-4 mb-2">
+                  <div className="w-1/2 flex flex-col px-4 mb-4 relative">
                     <label className="text-[#313030] text-[13px]">Phone</label>
-                    <input className="border border-[#aaaaaad6] focus:outline-[#aaaaaad6] h-[30px] px-3 text-[13px] rounded" />
+                    <input
+                      className="border border-[#aaaaaad6] focus:outline-[#aaaaaad6] h-[30px] px-3 text-[13px] rounded"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+                    {errors.phone && <ErrorSpan text={errors.phone} />}
                   </div>
-                  <div className="w-1/2 flex flex-col px-4 mb-2">
+                  <div className="w-1/2 flex flex-col px-4 mb-4 relative">
                     <label className="text-[#313030] text-[13px]">Email</label>
                     <input
                       placeholder="Email"
                       className="border border-[#aaaaaad6] focus:outline-[#aaaaaad6] h-[30px] px-3 text-[13px] rounded"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                     />
+                    {errors.email && <ErrorSpan text={errors.email} />}
                   </div>
                 </div>
               </div>
@@ -112,109 +197,72 @@ const AddNewForm = ({closeModal}) => {
 
             {/* Inputs */}
             <div className="flex justify-between items-center flex-wrap">
-              <div className="w-full flex flex-col px-4 mb-2">
+              <div className="w-full flex flex-col px-4 mb-4 relative">
                 <label className="text-[#313030] text-[13px]">Office</label>
-                <select
-                  name=""
-                  id=""
-                  className="px-3 border border-[#aaaaaad6] focus:outline-[#aaaaaad6] h-[30px] rounded text-[13px] text-[#8f9da9]"
-                >
-                  <option disabled selected>
-                    name
-                  </option>
-                  <option className="text-[#404447]">Arabic Localizer</option>
-                  <option className="text-[#404447]">Microsoft</option>
-                  <option className="text-[#404447]">IBM</option>
-                </select>
+                <SelectInput
+                  id="office"
+                  changeHandler={setOffice}
+                  options={["Arabic Localizer", "Microsoft", "IBM"]}
+                />
+                {errors.office && <ErrorSpan text={errors.office} />}
               </div>
 
-              <div className="w-1/2 flex flex-col px-4 mb-2">
+              <div className="w-1/2 flex flex-col px-4 mb-4 relative">
                 <label className="text-[#313030] text-[13px]">Department</label>
-                <select
-                  name=""
-                  id=""
-                  className="px-3 border border-[#aaaaaad6] focus:outline-[#aaaaaad6] h-[30px] rounded text-[13px] text-[#8f9da9]"
-                >
-                  <option disabled selected>
-                    Select
-                  </option>
-                  <option className="text-[#404447]">
-                    Business Development
-                  </option>
-                  <option className="text-[#404447]">
-                    Chemistry Department
-                  </option>
-                  <option className="text-[#404447]">
-                    Agriculture Department
-                  </option>
-                </select>
+                <SelectInput
+                  id="department"
+                  changeHandler={setDepartment}
+                  options={[
+                    "Business Development",
+                    "Chemistry Department",
+                    "Agriculture Department",
+                  ]}
+                />
+                {errors.department && <ErrorSpan text={errors.department} />}
               </div>
 
-              <div className="w-1/2 flex flex-col px-4 mb-2">
-                <label className="text-[#313030] text-[13px]">
+              <div className="w-1/2 flex flex-col px-4 mb-4 relative">
+                <label className="text-[#313030] text-[13px]" htmlFor="att">
                   Attendance Profile
                 </label>
-                <select
-                  name=""
-                  id=""
-                  className="px-3 border border-[#aaaaaad6] focus:outline-[#aaaaaad6] h-[30px] rounded text-[13px] text-[#8f9da9]"
-                >
-                  <option disabled selected>
-                    Select
-                  </option>
-                  <option className="text-[#404447]">Weekend</option>
-                  <option className="text-[#404447]">Present</option>
-                  <option className="text-[#404447]">Absent</option>
-                </select>
+                <SelectInput
+                  id="att"
+                  changeHandler={setAttendance}
+                  options={["Weekend", "Present", "Absent"]}
+                />
+                {errors.attendance && <ErrorSpan text={errors.attendance} />}
               </div>
 
-              <div className="w-1/2 flex flex-col px-4 mb-2">
+              <div className="w-1/2 flex flex-col px-4 mb-4 relative">
                 <label className="text-[#313030] text-[13px]">Role</label>
-                <select
-                  name=""
-                  id=""
-                  className="px-3 border border-[#aaaaaad6] focus:outline-[#aaaaaad6] h-[30px] rounded text-[13px] text-[#8f9da9]"
-                >
-                  <option disabled selected>
-                    Select
-                  </option>
-                  <option className="text-[#404447]">Manager</option>
-                  <option className="text-[#404447]">Employee</option>
-                  <option className="text-[#404447]">Customer</option>
-                </select>
+                <SelectInput
+                  id="role"
+                  changeHandler={setRole}
+                  options={["Manager", "Employee", "Customer"]}
+                />
+                {errors.role && <ErrorSpan text={errors.role} />}
               </div>
 
-              <div className="w-1/2 flex flex-col px-4 mb-2">
+              <div className="w-1/2 flex flex-col px-4 mb-4 relative">
                 <label className="text-[#313030] text-[13px]">Position</label>
-                <select
-                  name=""
-                  id=""
-                  className="px-3 border border-[#aaaaaad6] focus:outline-[#aaaaaad6] h-[30px] rounded text-[13px] text-[#8f9da9]"
-                >
-                  <option disabled selected>
-                    Select
-                  </option>
-                  <option className="text-[#404447]">HR Head</option>
-                  <option className="text-[#404447]">Manager</option>
-                  <option className="text-[#404447]">Worker</option>
-                </select>
+                <SelectInput
+                  id="Position"
+                  changeHandler={setPosition}
+                  options={["HR Head", "Manager", "Worker"]}
+                />
+                {errors.position && <ErrorSpan text={errors.position} />}
               </div>
 
-              <div className="w-1/2 flex flex-col px-4 mb-2">
+              <div className="w-1/2 flex flex-col px-4 mb-4 relative">
                 <label className="text-[#313030] text-[13px]">
                   Direct Manager
                 </label>
-                <select
-                  name=""
-                  id=""
-                  className="px-3 border border-[#aaaaaad6] focus:outline-[#aaaaaad6] h-[30px] rounded text-[13px] text-[#8f9da9]"
-                >
-                  <option disabled selected>
-                    Select Option
-                  </option>
-                  <option className="text-[#404447]">Ahmed Ismail</option>
-                  <option className="text-[#404447]">Malek Mohammed</option>
-                </select>
+                <SelectInput
+                  id="dm"
+                  changeHandler={setManager}
+                  options={["Ahmed Ismail", "Malek Mohammed"]}
+                />
+                {errors.manager && <ErrorSpan text={errors.manager} />}
               </div>
             </div>
             {/* End Inputs */}
@@ -222,13 +270,23 @@ const AddNewForm = ({closeModal}) => {
             <ModalTitle text="Office Info" />
 
             <div className="flex items-center gap-2">
-                <input type="checkbox" id="allow" />
-                <label className="text-[13px] font-bold text-[#313030]" htmlFor="allow">Allow Employee To Work From Home</label>
+              <input type="checkbox" id="allow" />
+              <label
+                className="text-[13px] font-bold text-[#313030]"
+                htmlFor="allow"
+              >
+                Allow Employee To Work From Home
+              </label>
             </div>
-            
+
             <div className="flex justify-end gap-3">
-                <Button text="Cancel" color="#ff6a6a" />
-                <Button text="Save" color="#23aaeb"/>
+              <button
+                className={` text-white w-[94px] h-[27px] rounded-[5px] font-[Roboto] bg-[#ff6a6a] `}
+                onClick={closeModal}
+              >
+                Cancel
+              </button>
+              <Button text="Save" color="#23aaeb" onSubmit={handleSubmit} />
             </div>
           </form>
         </div>

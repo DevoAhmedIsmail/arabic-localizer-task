@@ -1,10 +1,14 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { BsSearch } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
 import AddNewForm from "./AddNewForm";
+import { EmployeeContext } from "../context/EmployeeProvider";
 
 const SearchForm = () => {
   const [showModal, setShowModal] = useState(true);
+
+  const { setSearchText,searchText } = useContext(EmployeeContext);
+
 
   const closeModal = () => {
     setShowModal(false);
@@ -18,6 +22,8 @@ const SearchForm = () => {
           <input
             className="pl-9 w-full h-full font-[Roboto] text-[#707070] focus:outline-none"
             placeholder="Search"
+            onChange={(e)=>setSearchText(e.target.value)}
+            value={searchText}
           />
         </div>
         <button className="bg-[#2764ac] text-white w-[100px] h-[30px] rounded-[5px] font-[Roboto] flex items-center justify-center gap-1" onClick={()=>setShowModal(true)}>
