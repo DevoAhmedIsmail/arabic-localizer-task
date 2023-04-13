@@ -2,3 +2,23 @@
     box-shadow: 0 3px 15px 0 rgba(0, 0, 0, 0.09);
     border: solid 1px #eaeef0;
 }
+
+.details-shadow {
+    box-shadow: 0 3px 7px 0 rgba(0, 0, 0, 0.3);
+}
+
+.point-shape::before {
+    content: "";
+    position: absolute;
+    right: 39px;
+    top: -10px;
+    width: 18px;
+    height: 18px;
+    background-color: #fff;
+    border-radius: 10px 0 0 0;
+    transform: rotate(224deg);
+    border: solid 1px #eaeef0;
+    z-index: 1;
+    border-top-color: transparent;
+    border-left-color: transparent;
+}
