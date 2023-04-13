@@ -113,11 +113,11 @@ const AddNewForm = ({ closeModal }) => {
 
   return (
     <div
-      className="absolute top-0 left-0 w-full min-h-screen z-30 flex justify-center items-center"
+      className="fixed top-0 left-0 w-full min-h-screen z-30 flex justify-center items-center"
       style={{ backgroundColor: "rgba(40, 104, 174, 0.43)" }}
     >
       <div
-        className="bg-white p-5  w-[90%] md:w-[700px] lg:w-[1000px] overflow-auto"
+        className="bg-white p-5 max-h-[100vh] md:min-h-[700px] w-[90%] md:w-[700px] lg:w-[1000px] overflow-auto"
         ref={wrapperRef}
       >
         <div className="border-b-2 border-[#23aaeb]  pb-3">
@@ -129,7 +129,7 @@ const AddNewForm = ({ closeModal }) => {
         <div className="">
           <form onSubmit={(e) => handleSubmit(e)}>
             <ModalTitle text="Personal Info" />
-            <div className="grid grid-cols-12 gap-6 items-center">
+            <div className="grid grid-cols-12 items-center">
               <div className="col-start-1 col-end-13 md:col-end-4 relative">
                 <input
                   id="image-upload"
@@ -138,7 +138,7 @@ const AddNewForm = ({ closeModal }) => {
                 />
 
                 <label htmlFor="image-upload">
-                  <div className={`box box-drag border-2 }`}>
+                  <div className={`box box-drag border-2 border-dotted }`}>
                     <span className={`w-full h-full text-[13px] font-bold text-center text-[#5c6974] font-[Roboto] tracking-[1.73px] ${!image && 'absolute top-[43%] translate-y-0'}`}>
                       {image ? <img src={image} alt="user" className="w-full h-full object-contain" /> : "DRAG IMAGE HERE"}
                     </span>

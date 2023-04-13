@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { MdNotificationsActive } from "react-icons/md";
 import Badge from "./Badge";
 import { IoIosArrowDown } from "react-icons/io";
+import { AiOutlineMenu } from "react-icons/ai";
 
 import personImage from "../assets/persons/cheerful-curly-business-girl-wearing-glasses.jpg";
 
@@ -29,16 +30,16 @@ const Navbar = () => {
   return (
     <nav className="bg-white py-3">
       <div className="container mx-auto px-6">
-        <div className="flex justify-end items-center gap-5">
-          <p className="font-[Roboto] text-[#474747] text-[15px]">
+        <div className="flex justify-end items-center gap-5 ">
+          <p className="hidden md:block font-[Roboto] text-[#474747] text-[15px]">
             {currentTime.toLocaleString("en-US", options)}
           </p>
 
-          <button className="bg-[color:var(--green-color)] text-white w-[94px] h-[27px] rounded-[5px] font-[Roboto] ">
+          <button className="hidden md:block  bg-[color:var(--green-color)] text-white w-[94px] h-[27px] rounded-[5px] font-[Roboto] ">
             Sign In
           </button>
 
-          <div className="relative border-x-2 border-[#e8e4e4] py-3 px-5">
+          <div className="hidden md:block  relative border-x-2 border-[#e8e4e4] py-3 px-5">
             <MdNotificationsActive className="text-[#8997a4] text-[23px]" />
             <Badge
               text="1"
@@ -64,7 +65,7 @@ const Navbar = () => {
             </div>
           </div>
         </div>
-      
+       
       </div>
     </nav>
   );

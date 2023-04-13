@@ -1,11 +1,11 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { BsSearch } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
 import AddNewForm from "./AddNewForm";
 import { EmployeeContext } from "../context/EmployeeProvider";
 
 const SearchForm = () => {
-  const [showModal, setShowModal] = useState(true);
+  const [showModal, setShowModal] = useState(false);
 
   const { setSearchText,searchText } = useContext(EmployeeContext);
 
@@ -14,9 +14,23 @@ const SearchForm = () => {
     setShowModal(false);
   };
 
+  useEffect(() => {
+    
+    if (showModal) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+
+    
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, [showModal]);
+
   return (
     <div>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col md:flex-row items-center gap-3">
         <div className="bg-white relative h-[30px] px-[26px] flex-1 rounded shadow-sm">
           <BsSearch className="text-[#23aaeb] absolute top-1/2 -translate-y-1/2 left-[26px] text-[16px]" />
           <input

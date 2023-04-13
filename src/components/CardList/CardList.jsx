@@ -110,10 +110,14 @@ const CardList = () => {
 
   return (
     <div className="py-8">
-      <div className="grid grid-cols-4 gap-x-[45px] gap-y-[35px]">
-        {filteredEmployees.map((data) => (
-          <CardItem data={data} key={data.id} />
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-[45px] gap-y-[35px]">
+        {filteredEmployees.length ? (
+          filteredEmployees.map((data) => (
+            <CardItem data={data} key={data.id} />
+          ))
+        ) : (
+          <p className="text-sm text-[#8997a4] px-3 font-bolder tracking-wide">Sorry , There is no Employee ...</p>
+        )}
       </div>
     </div>
   );

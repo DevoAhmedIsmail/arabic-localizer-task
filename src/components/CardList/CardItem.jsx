@@ -30,14 +30,14 @@ const CardItem = ({ data }) => {
   return (
     <div className="card-item bg-white px-5 py-3">
       <div className="grid grid-cols-12">
-        <div className="col-start-1 col-end-4">
+        <div className="col-start-1 col-end-13 md:col-end-4">
           <div>
             <img
-              src={data.image}
+              src={data.image ? data.image : "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=600"}
               alt="person"
-              className="w-[64px] h-[64px] rounded-full object-cover"
+              className="w-[100px] h-[100px] md:w-[64px] md:h-[64px] rounded-full object-cover mx-auto"
             />
-            <div className="flex justify-between items-center text-[#8997a4] text-[18px] mt-[10px]">
+            <div className="flex justify-center gap-10 md:gap-0 md:justify-between items-center text-[#8997a4] text-[18px] mt-[15px] md:mt-[10px] mb-5 md:mb-0">
               <HiPencil />
               <AiOutlinePauseCircle />
               <RiDeleteBin2Fill
@@ -47,10 +47,10 @@ const CardItem = ({ data }) => {
             </div>
           </div>
         </div>
-        <div className="col-start-4 col-end-13 pl-[20px] h-full ">
-          <div className="border-l border-[#8997a440] h-full pl-5">
-            <div>
-              <p className="text-[20px] text-[#5c6974] font-[Lato] ">
+        <div className="col-start-1 md:col-start-4 col-end-13 pl-[20px] h-full ">
+          <div className="border-t md:border-t-0 border-l-0 md:border-l border-[#8997a440] h-full pl-5">
+            <div className="text-center md:text-left">
+              <p className="text-[20px] text-[#5c6974] font-[Lato] capitalize ">
                 {data.name}
               </p>
               <p className="text-[13px] text-[#313030] font-[Roboto]">
@@ -65,16 +65,19 @@ const CardItem = ({ data }) => {
 
               <div className="flex items-center gap-2">
                 <div className="bg-[#eaeef0] w-[19px] h-[19px] rounded-full text-center text-sm ">
-                  <HiEnvelope className="mx-auto translate-y-[3px]" />
+                  <HiEnvelope className="mx-auto translate-y-[3px] text-sm" />
                 </div>
                 <div className="bg-[#eaeef0] w-[19px] h-[19px] rounded-full text-center text-sm ">
-                  <MdCallEnd className="mx-auto translate-y-[3px]" />
+                  <MdCallEnd className="mx-auto translate-y-[3px] text-sm" />
                 </div>
                 <div
                   className="bg-[#eaeef0] w-[19px] h-[19px] rounded-full text-center text-sm details-shadow cursor-pointer relative"
-                  onClick={() => setShowDetails(!showDetails)}
+                  onMouseEnter={()=>setShowDetails(true)}
+                  onMouseLeave={()=>setShowDetails(false)}
+
+                  // onClick={() => setShowDetails(!showDetails)}
                 >
-                  <TbExclamationMark className="mx-auto translate-y-[3px]" />
+                  <TbExclamationMark className="mx-auto translate-y-[3px] text-sm" />
                   {showDetails && (
                     <div
                       className="bg-white shadow absolute top-7 -right-10 w-[240px] point-shape border border-[#eaeef0] z-10"
