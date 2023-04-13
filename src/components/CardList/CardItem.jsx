@@ -91,7 +91,6 @@ const CardItem = ({ data }) => {
                                     <p className="text-[#8997a4] text-[8px] font-[Roboto] ">Manager</p>
                                     <p className="text-[#313030] text-[8px] font-[Roboto] -mt-[5px]">{data.manager}</p>
                                 </div>
-
                            </div>
                         </div>
                     )
