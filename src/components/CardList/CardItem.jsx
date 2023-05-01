@@ -30,7 +30,7 @@ const CardItem = ({ data }) => {
     };
   }, [wrapperRef]);
   return (
-    <div className="card-item bg-white px-5 py-3">
+    <div className="card-item bg-white pl-4 pr-3 py-3">
       <div className="grid grid-cols-12">
         <div className="col-start-1 col-end-13 md:col-end-4">
           <div>
@@ -52,7 +52,7 @@ const CardItem = ({ data }) => {
         <div className="col-start-1 md:col-start-4 col-end-13 pl-0 md:pl-[20px] h-full ">
           <div className="border-t md:border-t-0 border-l-0 md:border-l border-[#8997a440] h-full pl-0 md:pl-5">
             <div className="text-center md:text-left">
-              <p className="text-[20px] text-[#5c6974] font-[Lato] capitalize text-overflow ">
+              <p className="text-[20px] text-[#5c6974] font-[Lato] capitalize text-overflow" title={data.name}>
                 {data.name}
               </p>
               <p className="text-[13px] text-[#313030] font-[Roboto]">
@@ -79,10 +79,10 @@ const CardItem = ({ data }) => {
                     >
                       <div className="grid grid-cols-3 text-left p-1">
                         <div className="flex flex-col">
-                          <p className="text-[#8997a4] text-[8px] font-[Roboto] mb-2 ">
+                          <p className="text-[#8997a4] text-[10px] font-[Roboto] mb-2 ">
                             Email
                           </p>
-                          <p className="text-[#313030] text-[8px] font-[Roboto] -mt-[5px]">
+                          <p className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px]">
                             {data.email}
                           </p>
                         </div>
@@ -103,10 +103,10 @@ const CardItem = ({ data }) => {
                     >
                       <div className="grid grid-cols-3 text-left p-1">
                         <div className="flex flex-col">
-                          <p className="text-[#8997a4] text-[8px] font-[Roboto] mb-2 ">
+                          <p className="text-[#8997a4] text-[10px] font-[Roboto] mb-2 ">
                             Phone
                           </p>
-                          <p className="text-[#313030] text-[8px] font-[Roboto] -mt-[5px]">
+                          <p className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px]">
                             {data.phone}
                           </p>
                         </div>
@@ -129,42 +129,42 @@ const CardItem = ({ data }) => {
                     >
                       <div className="grid grid-cols-3 text-left p-1">
                         <div className="flex flex-col">
-                          <p className="text-[#8997a4] text-[8px] font-[Roboto] mb-2 ">
+                          <p className="text-[#8997a4] text-[10px] font-[Roboto] mb-2 ">
                             Office
                           </p>
-                          <p className="text-[#313030] text-[8px] font-[Roboto] -mt-[5px]">
+                          <p className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px]">
                             {data.office}
                           </p>
                         </div>
                         <div className="flex flex-col">
-                          <p className="text-[#8997a4] text-[8px] font-[Roboto] mb-2 ">
+                          <p className="text-[#8997a4] text-[10px] font-[Roboto] mb-2 ">
                             Role
                           </p>
-                          <p className="text-[#313030] text-[8px] font-[Roboto] -mt-[5px]">
+                          <p className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px]">
                             {data.role}
                           </p>
                         </div>
                         <div className="flex flex-col">
-                          <p className="text-[#8997a4] text-[8px] font-[Roboto] mb-2 ">
+                          <p className="text-[#8997a4] text-[10px] font-[Roboto] mb-2  ">
                             Copied Manager
                           </p>
-                          <p className="text-[#313030] text-[8px] font-[Roboto] -mt-[5px]">
+                          <p className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px] text-overflow" title={data.manager}>
                             {data.manager}
                           </p>
                         </div>
                         <div className="flex flex-col">
-                          <p className="text-[#8997a4] text-[8px] font-[Roboto] mb-2 ">
+                          <p className="text-[#8997a4] text-[10px] font-[Roboto] mb-2 ">
                             Joining Date
                           </p>
-                          <p className="text-[#313030] text-[8px] font-[Roboto] -mt-[5px]">
+                          <p className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px]">
                             {data.startDate}
                           </p>
                         </div>
                         <div className="flex flex-col">
-                          <p className="text-[#8997a4] text-[8px] font-[Roboto] mb-2 ">
+                          <p className="text-[#8997a4] text-[10px] font-[Roboto] mb-2 ">
                             Manager
                           </p>
-                          <p className="text-[#313030] text-[8px] font-[Roboto] -mt-[5px]">
+                          <p className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px] text-overflow" title={data.manager}>
                             {data.manager}
                           </p>
                         </div>

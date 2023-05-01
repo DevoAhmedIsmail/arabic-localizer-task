@@ -4,13 +4,26 @@ import Button from "./Button";
 import { EmployeeContext } from "../context/EmployeeProvider";
 import { SelectInput } from "./Inputs";
 import ErrorSpan from "./ErrorSpan";
-import {MdClose} from 'react-icons/md'
+import { MdClose } from "react-icons/md";
 
 const AddNewForm = ({ closeModal }) => {
-  const [userData, setUserData] = useState({})
+  const [userData, setUserData] = useState({
+    name: "",
+    image: "",
+    startDate: "",
+    phone: "",
+    email: "",
+    attendance: "",
+    department: "",
+    manager: "",
+    office: "",
+    position: "",
+    role: "",
+    workFromHome:false
+  });
   console.log(userData);
-  
-  const [isSaveForm, setIsSaveForm] = useState(false)
+
+  const [isSaveForm, setIsSaveForm] = useState(false);
   const [errors, setErrors] = useState({});
 
   // to store image which come form user
@@ -63,24 +76,27 @@ const AddNewForm = ({ closeModal }) => {
   // Handle Image come from user
   const handleImageUpload = (event) => {
     const imageFile = event.target.files[0];
-    if(imageFile){
+    if (imageFile) {
       setSelectedImage(imageFile);
-      setUserData(prev => ({...prev,image: URL.createObjectURL(imageFile)}))
+      setUserData((prev) => ({
+        ...prev,
+        image: URL.createObjectURL(imageFile),
+      }));
     }
   };
 
   // Submit Form
   function handleSubmit(e) {
-    setIsSaveForm(true)
+    setIsSaveForm(true);
     e.preventDefault();
     if (validateForm()) {
       // console.log('Form submitted:', { name, email, phone });
       // Do something with the form data
-      
+
       addEmployee(userData);
 
       closeModal();
-      setIsSaveForm(false)
+      // setIsSaveForm(false);
     }
   }
 
@@ -99,16 +115,21 @@ const AddNewForm = ({ closeModal }) => {
     };
   }, [wrapperRef]);
 
-  // Cancel Image 
-  const cancelImage = (e)=> {
+  // Cancel Image
+  const cancelImage = (e) => {
     e.stopPropagation();
-    setUserData((prev) => ({...prev, image: ''}))
-  }
-  useEffect(()=>{
-    if(isSaveForm){
-      validateForm()
+    setUserData((prev) => ({ ...prev, image: "" }));
+  };
+  useEffect(() => {
+    if (isSaveForm) {
+      validateForm();
     }
-  },[userData])
+  }, [userData]);
+
+  const handleInputChange = (e) => {
+    const { target } = e;
+    setUserData((prev) => ({ ...prev, [target.name]: target.value }));
+  };
 
   return (
     <div
@@ -116,7 +137,7 @@ const AddNewForm = ({ closeModal }) => {
       style={{ backgroundColor: "rgba(40, 104, 174, 0.43)" }}
     >
       <div
-        className="bg-white p-5 max-h-[100vh] md:min-h-[700px] w-[90%] md:w-[700px] lg:w-[1000px] overflow-auto"
+        className="bg-white pt-[11px] pb-[0px] p-5 max-h-[100vh] md:min-h-[691px] w-[90%] md:w-[700px] lg:w-[1000px] overflow-auto rounded-[4px]"
         ref={wrapperRef}
       >
         <div className="border-b-2 border-[#23aaeb]  pb-3">
@@ -128,7 +149,7 @@ const AddNewForm = ({ closeModal }) => {
         <div className="">
           <form onSubmit={(e) => handleSubmit(e)}>
             <ModalTitle text="Personal Info" />
-            <div className="grid grid-cols-12">
+            <div className="grid grid-cols-12 mt-[20px]">
               <div className="col-start-1 col-end-13 md:col-end-4 relative mb-4">
                 <input
                   id="image-upload"
@@ -136,57 +157,121 @@ const AddNewForm = ({ closeModal }) => {
                   onChange={handleImageUpload}
                 />
                 {/* close image */}
-                {userData.image && <MdClose className="absolute top-[-15px] right-0 font-bold text-red-400 cursor-pointer z-[100]" onClick={(e)=> cancelImage(e)} /> }
-                
+                {userData.image && (
+                  <div className="absolute top-2 right-2 font-bold text-red-400 cursor-pointer z-[100] w-5 h-5 bg-white rounded-full flex items-center justify-center">
+
+                    <MdClose
+                      onClick={(e) => cancelImage(e)}
+                    />
+                  </div>
+                )}
 
                 <label htmlFor="image-upload" className="h-full block">
-                  <div className={`box box-drag border-2 border-dashed relative }`}>
-                    <span className={`text-[13px] font-bold text-center text-[#5c6974] font-[Roboto] tracking-[1.73px] ${!userData.image && 'absolute top-[43%] translate-y-0'}`}>
-                      {userData.image ? <img src={userData.image} alt="user" className="w-full h-full object-contain" /> : "DRAG IMAGE HERE"}
+                  <div
+                    className={`box box-drag border-2 border-dashed relative }`}
+                  >
+                    <span
+                      className={`text-[13px] font-normal text-center text-[#5c6974] font-[Roboto] tracking-[1.73px] ${
+                        !userData.image && "absolute top-[43%] translate-y-0"
+                      }`}
+                    >
+                      {userData.image ? (
+                        <img
+                          src={userData.image}
+                          alt="user"
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        "DRAG IMAGE HERE"
+                      )}
                     </span>
                   </div>
                 </label>
               </div>
               {/* Inputs */}
               <div className="col-start-1 md:col-start-4 col-end-13">
-                <div className="flex justify-between items-center flex-wrap">
+                <div className="flex justify-between items-center flex-wrap mt-[-4px]">
                   <div className="w-1/2 flex flex-col px-4 mb-4 relative">
-                    <label className={`text-[13px] ${errors.name ? 'text-red-400' : 'text-[#313030]'}`}>Name</label>
+                    <label
+                      className={`text-[13px] ${
+                        errors.name ? "text-red-400" : "text-[#313030]"
+                      }`}
+                      htmlFor="name"
+                    >
+                      Name
+                    </label>
                     <input
-                      className={`border ${errors.name ? 'border-red-400' : 'border-[#aaaaaad6]' }  focus:outline-[#aaaaaad6] h-[30px] px-3 text-[13px] rounded`}
+                      id="name"
+                      className={`border ${
+                        errors.name ? "border-red-400" : "border-[#aaaaaad6]"
+                      }  focus:outline-[#aaaaaad6] h-[30px] px-3 text-[13px] rounded`}
                       value={userData.name}
-                      onChange={(e) => setUserData(prev => ({...prev,name: e.target.value}))}
+                      name="name"
+                      onChange={handleInputChange}
                     />
                     {errors.name && <ErrorSpan text={errors.name} />}
                   </div>
                   <div className="w-1/2 flex flex-col px-4 mb-4 relative">
-                    <label className={`text-[13px] ${errors.startDate ? 'text-red-400' : 'text-[#313030]'}`}>
+                    <label
+                    htmlFor="startDate"
+                      className={`text-[13px] ${
+                        errors.startDate ? "text-red-400" : "text-[#313030]"
+                      }`}
+                    >
                       Start Date
                     </label>
                     <input
+                      id="startDate"
+                      name="startDate"
                       type="date"
-                      className={`border ${errors.startDate ? 'border-red-400' : 'border-[#aaaaaad6]' }  focus:outline-[#aaaaaad6] h-[30px] px-3 text-[13px] rounded`}
+                      className={`border ${
+                        errors.startDate
+                          ? "border-red-400"
+                          : "border-[#aaaaaad6]"
+                      }  focus:outline-[#aaaaaad6] h-[30px] px-3 text-[13px] rounded`}
                       value={userData.startDate}
-                      onChange={(e) => setUserData(prev => ({...prev,startDate: e.target.value}))}
+                      onChange={handleInputChange}
                     />
                     {errors.startDate && <ErrorSpan text={errors.startDate} />}
                   </div>
                   <div className="w-1/2 flex flex-col px-4 mb-4 relative">
-                    <label className={`text-[13px] ${errors.phone ? 'text-red-400' : 'text-[#313030]'}`}>Phone</label>
+                    <label
+                    htmlFor="phone"
+                      className={`text-[13px] ${
+                        errors.phone ? "text-red-400" : "text-[#313030]"
+                      }`}
+                    >
+                      Phone
+                    </label>
                     <input
-                      className={`border ${errors.phone ? 'border-red-400' : 'border-[#aaaaaad6]' }  focus:outline-[#aaaaaad6] h-[30px] px-3 text-[13px] rounded`}
+                    id="phone"
+                    name="phone"
+                      className={`border ${
+                        errors.phone ? "border-red-400" : "border-[#aaaaaad6]"
+                      }  focus:outline-[#aaaaaad6] h-[30px] px-3 text-[13px] rounded`}
                       value={userData.phone}
-                      onChange={(e) => setUserData(prev => ({...prev,phone: e.target.value}))}
+                      onChange={handleInputChange}
                     />
                     {errors.phone && <ErrorSpan text={errors.phone} />}
                   </div>
                   <div className="w-1/2 flex flex-col px-4 mb-4 relative">
-                    <label className={`text-[13px] ${errors.email ? 'text-red-400' : 'text-[#313030]'}`}>Email</label>
+                    <label
+                    htmlFor="email"
+                      className={`text-[13px] ${
+                        errors.email ? "text-red-400" : "text-[#313030]"
+                      }`}
+                    >
+                      Email
+                    </label>
                     <input
+                      id="email"
+                      name="email"
                       placeholder="Email"
-                      className={`border ${errors.email ? 'border-red-400' : 'border-[#aaaaaad6]' }  focus:outline-[#aaaaaad6] h-[30px] px-3 text-[13px] rounded`}
+                      className={`border ${
+                        errors.email ? "border-red-400" : "border-[#aaaaaad6]"
+                      }  focus:outline-[#aaaaaad6] h-[30px] px-3 text-[13px] rounded`}
                       value={userData.email}
-                      onChange={(e) => setUserData(prev => ({...prev,email: e.target.value}))}
+                      onChange={handleInputChange}
                     />
                     {errors.email && <ErrorSpan text={errors.email} />}
                   </div>
@@ -200,18 +285,33 @@ const AddNewForm = ({ closeModal }) => {
             {/* Inputs */}
             <div className="flex justify-between items-center flex-wrap">
               <div className="w-full flex flex-col  mb-4 relative">
-                <label className={`text-[13px] ${errors.office ? 'text-red-400' : 'text-[#313030]'}`}>Office</label>
+                <label
+                  className={`text-[13px] ${
+                    errors.office ? "text-red-400" : "text-[#313030]"
+                  }`}
+                  htmlFor="office"
+                >
+                  Office
+                </label>
                 <SelectInput
                   id="office"
                   changeHandler={setUserData}
                   options={["Arabic Localizer", "Microsoft", "IBM"]}
                   isError={errors.office}
+                  value={userData.office}
                 />
                 {errors.office && <ErrorSpan text={errors.office} />}
               </div>
 
               <div className="w-1/2 flex flex-col  mb-4 relative">
-                <label className={`text-[13px] ${errors.department ? 'text-red-400' : 'text-[#313030]'}`}>Department</label>
+                <label
+                htmlFor="department"
+                  className={`text-[13px] ${
+                    errors.department ? "text-red-400" : "text-[#313030]"
+                  }`}
+                >
+                  Department
+                </label>
                 <SelectInput
                   id="department"
                   changeHandler={setUserData}
@@ -221,12 +321,18 @@ const AddNewForm = ({ closeModal }) => {
                     "Agriculture Department",
                   ]}
                   isError={errors.department}
+                  value={userData.department}
                 />
                 {errors.department && <ErrorSpan text={errors.department} />}
               </div>
 
-              <div className="w-1/2 flex flex-col pl-4 mb-4 relative">
-                <label className={`text-[13px] ${errors.attendance ? 'text-red-400' : 'text-[#313030]'}`} htmlFor="att">
+              <div className="w-1/2 flex flex-col pl-[32px] mb-4 relative">
+                <label
+                  className={`text-[13px] ${
+                    errors.attendance ? "text-red-400" : "text-[#313030]"
+                  }`}
+                  htmlFor="attendance"
+                >
                   Attendance Profile
                 </label>
                 <SelectInput
@@ -234,34 +340,56 @@ const AddNewForm = ({ closeModal }) => {
                   changeHandler={setUserData}
                   options={["Weekend", "Present", "Absent"]}
                   isError={errors.attendance}
+                  value={userData.attendance}
                 />
                 {errors.attendance && <ErrorSpan text={errors.attendance} />}
               </div>
 
               <div className="w-1/2 flex flex-col  mb-4 relative">
-                <label className={`text-[13px] ${errors.role ? 'text-red-400' : 'text-[#313030]'}`}>Role</label>
+                <label
+                  className={`text-[13px] ${
+                    errors.role ? "text-red-400" : "text-[#313030]"
+                  }`}
+                  htmlFor="role"
+                >
+                  Role
+                </label>
                 <SelectInput
                   id="role"
                   changeHandler={setUserData}
                   options={["Manager", "Employee", "Customer"]}
                   isError={errors.role}
+                  value={userData.role}
                 />
                 {errors.role && <ErrorSpan text={errors.role} />}
               </div>
 
-              <div className="w-1/2 flex flex-col pl-4 mb-4 relative">
-                <label className={`text-[13px] ${errors.position ? 'text-red-400' : 'text-[#313030]'}`}>Position</label>
+              <div className="w-1/2 flex flex-col pl-[32px] mb-4 relative">
+                <label
+                  className={`text-[13px] ${
+                    errors.position ? "text-red-400" : "text-[#313030]"
+                  }`}
+                  htmlFor="position"
+                >
+                  Position
+                </label>
                 <SelectInput
                   id="position"
                   changeHandler={setUserData}
                   options={["HR Head", "Manager", "Worker"]}
                   isError={errors.position}
+                  value={userData.position}
                 />
                 {errors.position && <ErrorSpan text={errors.position} />}
               </div>
 
-              <div className="w-1/2 flex flex-col mb-4 relative">
-                <label className={`text-[13px] ${errors.manager ? 'text-red-400' : 'text-[#313030]'}`}>
+              <div className="w-1/2 flex flex-col relative">
+                <label
+                  className={`text-[13px] ${
+                    errors.manager ? "text-red-400" : "text-[#313030]"
+                  }`}
+                  htmlFor="manager"
+                >
                   Direct Manager
                 </label>
                 <SelectInput
@@ -269,6 +397,7 @@ const AddNewForm = ({ closeModal }) => {
                   changeHandler={setUserData}
                   options={["Ahmed Ismail", "Malek Mohammed"]}
                   isError={errors.manager}
+                  value={userData.manager}
                 />
                 {errors.manager && <ErrorSpan text={errors.manager} />}
               </div>
@@ -278,9 +407,9 @@ const AddNewForm = ({ closeModal }) => {
             <ModalTitle text="Work From Home" />
 
             <div className="flex items-center gap-2">
-              <input type="checkbox" id="allow" />
+              <input type="checkbox" id="allow" checked={userData.workFromHome} onChange={(e)=> setUserData((prev)=>({...prev, workFromHome: !prev.workFromHome}))} />
               <label
-                className="text-[13px] font-bold text-[#313030]"
+                className={`text-[13px] ${userData.workFromHome && 'font-bold'} text-[#313030]`}
                 htmlFor="allow"
               >
                 Allow Employee To Work From Home
@@ -289,14 +418,14 @@ const AddNewForm = ({ closeModal }) => {
 
             <div className="bg-[#d2d2d2] block w-full h-[0.5px] mt-5 mb-2"></div>
 
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-3 mt-[15px]">
               <button
-                className={` text-white w-[94px] h-[27px] rounded-[5px] font-[Roboto] bg-[#ff6a6a] `}
+                className={` text-white w-[94px] h-[27px] rounded-[5px] font-[Roboto] bg-[#ff6a6a] text-[13px] `}
                 onClick={closeModal}
               >
                 Cancel
               </button>
-              <Button text="Save" color="#23aaeb" onSubmit={handleSubmit} />
+              <Button text="Save" color="#23aaeb" fontSize="13px" onSubmit={handleSubmit} />
             </div>
           </form>
         </div>
