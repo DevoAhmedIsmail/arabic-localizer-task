@@ -18,3 +18,14 @@ body {
     /* background-color: #f7f8f9; */
     font-family: "Roboto", sans-serif;
 }
+
+html {
+    min-height: 100%;
+    background-color: #f7f8f9;
+}
+
+.text-overflow {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

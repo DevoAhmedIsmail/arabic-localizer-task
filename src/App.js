@@ -1,19 +1,15 @@
 import "./App.css";
-import Sidebar from "./components/Sidebar";
-import Navbar from "./components/Navbar";
 import ListContainer from "./components/ListContainer";
+import Layout from "./pages/Layout";
 
 function App() {
   // const {employees,addEmployee} = useContext(EmployeeContext);
 
   return (
     <div className="App">
-      <Sidebar />
-
-      <div className="screen-margin">
-        <Navbar />
+      <Layout>
         <ListContainer />
-      </div>
+      </Layout>
     </div>
   );
 }

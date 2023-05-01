@@ -29,7 +29,7 @@
 
 /* Modal */
 .box-drag {
-    height: 100px;
+    height: 100%;
     width: 100%;
     display: flex;
     align-items: center;
@@ -45,4 +45,8 @@
     left: 0;
     opacity: 0;
     cursor: pointer;
-  }
+}
+
+#allow {
+    accent-color: #2764ac;
+}
