@@ -30,6 +30,14 @@ const CardItem = ({ data }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [wrapperRef]);
+
+  function isEllipsisActive(e) {
+    if(e.target.offsetWidth < e.target.scrollWidth){
+      setShowName(true)
+    }else{
+      setShowName(false)
+    }
+}
   return (
     <div className="card-item bg-white pl-4 pr-3 py-3">
       <div className="grid grid-cols-12">
@@ -53,7 +61,7 @@ const CardItem = ({ data }) => {
         <div className="col-start-1 md:col-start-4 col-end-13 pl-0 md:pl-[20px] h-full ">
           <div className="border-t md:border-t-0 border-l-0 md:border-l border-[#8997a440] h-full pl-0 md:pl-5">
             <div className="text-center md:text-left relative">
-              <p className="text-[20px] text-[#5c6974] font-[Lato] capitalize text-overflow leading-[1] mb-[5px]" onMouseEnter={()=>setShowName(true)} onMouseLeave={()=>setShowName(false)}>
+              <p className="text-[20px] text-[#5c6974] font-[Lato] capitalize text-overflow leading-[1] mb-[5px]" onMouseEnter={(e)=>isEllipsisActive(e)} onMouseLeave={()=>setShowName(false)}>
                 {data.name}
               </p>
               {showName && data.name.length > 13 && (
