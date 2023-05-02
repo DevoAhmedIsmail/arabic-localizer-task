@@ -29,3 +29,10 @@ html {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+select {
+    font-size: 20px;
+}
+option {
+    height: 15px;
+}

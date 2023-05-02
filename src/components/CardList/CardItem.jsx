@@ -13,6 +13,7 @@ const CardItem = ({ data }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
+  const [showName, setShowName] = useState(false)
   const { deleteEmployee } = useContext(EmployeeContext);
 
   const wrapperRef = useRef(null);
@@ -51,10 +52,18 @@ const CardItem = ({ data }) => {
         </div>
         <div className="col-start-1 md:col-start-4 col-end-13 pl-0 md:pl-[20px] h-full ">
           <div className="border-t md:border-t-0 border-l-0 md:border-l border-[#8997a440] h-full pl-0 md:pl-5">
-            <div className="text-center md:text-left">
-              <p className="text-[20px] text-[#5c6974] font-[Lato] capitalize text-overflow" title={data.name}>
+            <div className="text-center md:text-left relative">
+              <p className="text-[20px] text-[#5c6974] font-[Lato] capitalize text-overflow" onMouseEnter={()=>setShowName(true)} onMouseLeave={()=>setShowName(false)}>
                 {data.name}
               </p>
+              {showName && data.name.length > 13 && (
+                    <div
+                      className="bg-white shadow absolute top-7 -right-10 w-[240px] point-shape border border-[#eaeef0] z-10 px-1 text-sm"
+                      ref={wrapperRef}
+                    >
+                        {data.name}
+                    </div>
+                  )}
               <p className="text-[13px] text-[#313030] font-[Roboto]">
                 {data.position}
               </p>

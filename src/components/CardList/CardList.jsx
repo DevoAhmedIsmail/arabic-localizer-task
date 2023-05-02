@@ -104,9 +104,14 @@ import { EmployeeContext } from "../../context/EmployeeProvider";
 
 const CardList = () => {
   const { employees, searchText } = useContext(EmployeeContext);
-  const filteredEmployees = employees.filter((data) =>
-    data.name.includes(searchText)
+  const filteredEmployees = employees.filter((data) =>{
+
+    // console.log(data.name.toLowerCase().includes(searchText.toLowerCase()))
+   
+    return data.name.toLowerCase().includes(searchText.toLowerCase())
+  }
   );
+  
 
   return (
     <div className="py-8">

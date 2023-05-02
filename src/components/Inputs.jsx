@@ -1,7 +1,7 @@
 import React from "react";
 
 export const SelectInput = ({ id, changeHandler, options, isError, value }) => {
-  console.log(id,'=>>',value);
+  // console.log(id,'=>>',value);
   return (
     <select
       name=""

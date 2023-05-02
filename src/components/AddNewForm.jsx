@@ -21,7 +21,7 @@ const AddNewForm = ({ closeModal }) => {
     role: "",
     workFromHome:false
   });
-  console.log(userData);
+  // console.log(userData);
 
   const [isSaveForm, setIsSaveForm] = useState(false);
   const [errors, setErrors] = useState({});
@@ -137,7 +137,7 @@ const AddNewForm = ({ closeModal }) => {
       style={{ backgroundColor: "rgba(40, 104, 174, 0.43)" }}
     >
       <div
-        className="bg-white pt-[11px] pb-[0px] p-5 max-h-[100vh] md:min-h-[691px] w-[90%] md:w-[700px] lg:w-[1000px] overflow-auto rounded-[4px]"
+        className="bg-white pt-[11px] pb-[0px] p-5 max-h-[100vh] min-h-[710px] md:min-h-[691px] w-[90%] md:w-[700px] lg:w-[1000px] overflow-auto rounded-[4px]"
         ref={wrapperRef}
       >
         <div className="border-b-2 border-[#23aaeb]  pb-3">
