@@ -166,12 +166,12 @@ const AddNewForm = ({ closeModal }) => {
                   </div>
                 )}
 
-                <label htmlFor="image-upload" className="h-full block">
+                <label htmlFor="image-upload" className="h-[111px] block">
                   <div
                     className={`box box-drag border-2 border-dashed relative }`}
                   >
                     <span
-                      className={`text-[13px] font-normal text-center text-[#5c6974] font-[Roboto] tracking-[1.73px] ${
+                      className={`text-[13px] font-normal text-center text-[#5c6974] font-[Roboto] tracking-[1.73px] h-full ${
                         !userData.image && "absolute top-[43%] translate-y-0"
                       }`}
                     >

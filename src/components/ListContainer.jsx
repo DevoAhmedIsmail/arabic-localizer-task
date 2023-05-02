@@ -22,7 +22,7 @@ const ListContainer = () => {
     };
   }, [showModal]);
   return (
-    <div className="px-[35px] pt-2 min-h-full ">
+    <div className="pl-[35px] pr-[18px] pt-2 min-h-full ">
       <div className="bg-[#f7f8f9] px-3 py-5">
         <div className="flex flex-col md:flex-row items-center gap-3">
           <SearchForm setShowModal={setShowModal} />
