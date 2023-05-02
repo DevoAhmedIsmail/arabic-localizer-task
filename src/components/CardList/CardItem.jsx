@@ -39,7 +39,7 @@ const CardItem = ({ data }) => {
               alt="person"
               className="w-[100px] h-[100px] md:w-[64px] md:h-[64px] rounded-full object-cover mx-auto"
             />
-            <div className="flex justify-center gap-10 md:gap-0 md:justify-between items-center text-[#8997a4] text-[14px] mt-[15px] md:mt-[10px] mb-5 md:mb-0">
+            <div className="flex justify-center gap-10 md:gap-0 md:justify-between items-center text-[#8997a4] text-[14px] mt-[15px] md:mt-[14px] mb-5 md:mb-0">
               <HiPencil className="" />
               <AiOutlinePauseCircle className="" />
               <RiDeleteBin2Fill
@@ -52,13 +52,13 @@ const CardItem = ({ data }) => {
         <div className="col-start-1 md:col-start-4 col-end-13 pl-0 md:pl-[20px] h-full ">
           <div className="border-t md:border-t-0 border-l-0 md:border-l border-[#8997a440] h-full pl-0 md:pl-5">
             <div className="text-center md:text-left">
-              <p className="text-[20px] text-[#5c6974] font-[Lato] capitalize text-overflow" title={data.name}>
+              <p className="text-[20px] text-[#5c6974] font-[Lato] capitalize text-overflow leading-[1] mb-[5px]" title={data.name}>
                 {data.name}
               </p>
-              <p className="text-[13px] text-[#313030] font-[Roboto]">
+              <p className="text-[13px] text-[#313030] font-[Roboto] mb-[2px]">
                 {data.position}
               </p>
-              <p className="text-[10px] text-[#5c6974] font-[Roboto]">
+              <p className="text-[10px] text-[#5c6974] font-[Roboto] mb-[11px]">
                 {data.department}
               </p>
             </div>

@@ -22,7 +22,7 @@ const AttendLabel = ({ text }) => {
 
   return (
     <span
-      className="w-[60px] h-[17px] font-[Roboto] text-[11px] leading-[12px] text-center px-[8px] py-[2px]"
+      className="w-[60px] h-[18px] font-[Roboto] text-[11px] leading-[15px] text-center px-[8px] py-[2px]"
       style={labelStyle}
     >
       {text}
