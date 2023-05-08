@@ -18,11 +18,16 @@ const AttendLabel = ({ text }) => {
       backgroundColor: "#27b40c29",
       color: "#27b40c",
     };
+  }else if (text === "office based") {
+    labelStyle = {
+      backgroundColor: "#27b40c29",
+      color: "#27b40c",
+    };
   }
 
   return (
     <span
-      className="w-[60px] h-[18px] font-[Roboto] text-[11px] leading-[15px] text-center px-[8px] py-[2px]"
+      className="w-[60px] h-[18px] font-[Roboto] text-[11px] leading-[15px] text-center px-[8px] py-[2px] text-overflow"
       style={labelStyle}
     >
       {text}

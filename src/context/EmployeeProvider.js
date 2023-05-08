@@ -14,6 +14,10 @@ const EmployeeProvider = (props) => {
   const deleteEmployee = (userID) => {
     setEmployees(employees.filter(employee=> employee.id !== userID))
   }
+
+  const setAllEmployees = (data)=>{
+    setEmployees([...data])
+  }
   
   return (
     <EmployeeContext.Provider
@@ -22,7 +26,8 @@ const EmployeeProvider = (props) => {
         addEmployee,
         setSearchText,
         searchText,
-        deleteEmployee
+        deleteEmployee,
+        setAllEmployees
       }}
     >
       {props.children}

@@ -3,9 +3,11 @@ import SearchForm from "./SearchForm";
 import CardList from "./CardList/CardList";
 import AddNewForm from "./AddNewForm";
 import { FaPlus } from "react-icons/fa";
+import LoadingSpinner from "./LoadingSpinner";
+import Pagination from "./Pagination";
 
 
-const ListContainer = () => {
+const ListContainer = ({loadingContent,paginationInfo,pageHandler,pageArrowHandler,searchHandler}) => {
   const [showModal, setShowModal] = useState(false);
   const closeModal = () => {
     setShowModal(false);
@@ -32,7 +34,16 @@ const ListContainer = () => {
             <FaPlus /> <span className="text-[13px]">Add new</span>
           </button>
         </div>
-        <CardList />
+
+        {
+          loadingContent ? <LoadingSpinner/> : (
+            <>
+              <CardList searchHandler={searchHandler} />
+              <Pagination paginationInfo={paginationInfo} pageHandler={pageHandler} pageArrowHandler={pageArrowHandler} />
+            </>
+          )
+        }
+        
         {showModal && <AddNewForm closeModal={closeModal} />}
       </div>
     </div>

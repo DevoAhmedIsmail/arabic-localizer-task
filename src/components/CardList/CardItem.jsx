@@ -16,6 +16,8 @@ const CardItem = ({ data }) => {
   const [showName, setShowName] = useState(false)
   const { deleteEmployee } = useContext(EmployeeContext);
 
+  // console.log(data.position.name);
+
   const wrapperRef = useRef(null);
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -44,7 +46,7 @@ const CardItem = ({ data }) => {
         <div className="col-start-1 col-end-13 md:col-end-4">
           <div>
             <img
-              src={data.image ? data.image : "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=600"}
+              src={data.img_path ? data.img_path : "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=600"}
               alt="person"
               className="w-[100px] h-[100px] md:w-[64px] md:h-[64px] rounded-full object-cover mx-auto"
             />
@@ -73,14 +75,14 @@ const CardItem = ({ data }) => {
                     </div>
                   )}
               <p className="text-[13px] text-[#313030] font-[Roboto]">
-                {data.position}
+                {data.position?.name}
               </p>
               <p className="text-[10px] text-[#5c6974] font-[Roboto] mb-[11px]">
-                {data.department}
+                {data.department?.name}
               </p>
             </div>
             <div className="flex justify-between items-center mt-[13px]">
-              <AttendLabel text={data.attendance} />
+              <AttendLabel text={data.attendance_type} />
 
               <div className="flex items-center gap-2">
                 <div
@@ -149,8 +151,8 @@ const CardItem = ({ data }) => {
                           <p className="text-[#8997a4] text-[10px] font-[Roboto] mb-2 ">
                             Office
                           </p>
-                          <p className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px]">
-                            {data.office}
+                          <p className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px] text-overflow">
+                            {data.office?.name}
                           </p>
                         </div>
                         <div className="flex flex-col">
@@ -158,15 +160,15 @@ const CardItem = ({ data }) => {
                             Role
                           </p>
                           <p className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px]">
-                            {data.role}
+                            {data.position?.name}
                           </p>
                         </div>
                         <div className="flex flex-col">
                           <p className="text-[#8997a4] text-[10px] font-[Roboto] mb-2  ">
                             Copied Manager
                           </p>
-                          <p className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px] text-overflow" title={data.manager}>
-                            {data.manager}
+                          <p className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px] text-overflow" title={data.copied_managers?.name}>
+                            {data.manager?.name}
                           </p>
                         </div>
                         <div className="flex flex-col">
@@ -174,15 +176,15 @@ const CardItem = ({ data }) => {
                             Joining Date
                           </p>
                           <p className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px]">
-                            {data.startDate}
+                            {data.starts_at}
                           </p>
                         </div>
                         <div className="flex flex-col">
                           <p className="text-[#8997a4] text-[10px] font-[Roboto] mb-2 ">
                             Manager
                           </p>
-                          <p className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px] text-overflow" title={data.manager}>
-                            {data.manager}
+                          <p className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px] text-overflow" title={data.manager?.name}>
+                            {data.manager?.name}
                           </p>
                         </div>
                       </div>
