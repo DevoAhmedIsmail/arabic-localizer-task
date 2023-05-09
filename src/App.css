@@ -50,3 +50,22 @@
 #allow {
     accent-color: #2764ac;
 }
+
+.react-select__control {
+    max-height: 30px!important;
+    min-height: 30px!important;
+    border-radius: 0.25rem!important;
+
+}
+
+.react-select__value-container {
+    margin-bottom: 0!important;
+}
+
+.react-select__indicator {
+    padding: 0 7px!important;
+}
+
+.react-select__indicator-separator {
+    margin-bottom: 7px!important;
+}

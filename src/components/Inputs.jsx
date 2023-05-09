@@ -1,12 +1,13 @@
 import React from "react";
 import Select from 'react-select';
+import '../App.css'
 
 export const SelectInput = ({ id, changeHandler, options, isError, value,isLoading }) => {
 
   return (
     <Select
-      //  classNamePrefix="select"
        defaultValue={value}
+       classNamePrefix="react-select"
        onChange={(e) =>
         changeHandler((prev) => ({ ...prev, [id]: e.value }))
       }
@@ -16,6 +17,7 @@ export const SelectInput = ({ id, changeHandler, options, isError, value,isLoadi
        name=""
        options={options.map(option=>({value: option,label: option}))}
       //  value={value}
+      className={`  ${isError ? "border-red-400" : "border-[#aaaaaad6]"}  focus:outline-[#aaaaaad6] h-[30px] rounded text-[13px] text-[#8f9da9]`}
       />
   );
 };
