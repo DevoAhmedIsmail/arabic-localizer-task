@@ -1,9 +1,9 @@
 import React from "react";
 import { BsArrowLeftSquareFill, BsArrowRightSquareFill } from "react-icons/bs";
 
-const Pagination = ({ paginationInfo, pageHandler, pageArrowHandler }) => {
+const Pagination = ({ paginationInfo, pageHandler, pageArrowHandler, numOfCard }) => {
   // const {hasMorePages,currentPage,hasMorePages,total} = paginationInfo
-  console.log("pagination page", paginationInfo);
+  // console.log("pagination page", paginationInfo);
 
   return (
     <div className="flex justify-center items-center gap-1">
@@ -20,7 +20,7 @@ const Pagination = ({ paginationInfo, pageHandler, pageArrowHandler }) => {
           } w-10 h-10`}
         />
       </button>
-      {[...Array(Math.ceil(paginationInfo.total / 16))].map((e, index) => (
+      {[...Array(Math.ceil(paginationInfo.total / numOfCard))].map((e, index) => (
         <span
           key={index}
           className={`cursor-pointer ${
@@ -35,10 +35,10 @@ const Pagination = ({ paginationInfo, pageHandler, pageArrowHandler }) => {
       ))}
       <button
         disabled={
-          paginationInfo.currentPage === Math.ceil(paginationInfo.total / 16)
+          !paginationInfo.hasMorePages
         }
         className="cursor-pointer"
-        onClick={() => paginationInfo.currentPage === Math.ceil(paginationInfo.total/16) ? pageArrowHandler(1): ""}
+        onClick={() => paginationInfo.hasMorePages ? pageArrowHandler(1): ""}
       >
         <BsArrowRightSquareFill
           className={`${

@@ -2,9 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { BsSearch } from "react-icons/bs";
 import { EmployeeContext } from "../context/EmployeeProvider";
 
-const SearchForm = () => {
-
-  const { setSearchText,searchText } = useContext(EmployeeContext);
+const SearchForm = ({searchHandler, searchText}) => {
 
   return (
     <div className="bg-white relative h-[30px] px-[26px] flex-1 rounded-[5px] shadow-sm">
@@ -12,7 +10,7 @@ const SearchForm = () => {
       <input
         className="pl-9 w-full h-full font-[Roboto] text-[#707070] text-[14px] focus:outline-none"
         placeholder="Search"
-        onChange={(e)=>setSearchText(e.target.value)}
+        onChange={(e)=>searchHandler(e.target.value)}
         value={searchText}
       />
     </div>

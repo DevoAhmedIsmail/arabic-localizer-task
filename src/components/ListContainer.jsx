@@ -7,7 +7,7 @@ import LoadingSpinner from "./LoadingSpinner";
 import Pagination from "./Pagination";
 
 
-const ListContainer = ({loadingContent,paginationInfo,pageHandler,pageArrowHandler,searchHandler}) => {
+const ListContainer = ({loadingContent,paginationInfo,pageHandler,pageArrowHandler,searchHandler,pageNumber, numOfCard, searchText}) => {
   const [showModal, setShowModal] = useState(false);
   const closeModal = () => {
     setShowModal(false);
@@ -27,7 +27,7 @@ const ListContainer = ({loadingContent,paginationInfo,pageHandler,pageArrowHandl
     <div className="pl-[35px] pr-[18px] pt-2 min-h-full ">
       <div className="bg-[#f7f8f9] px-3 py-5">
         <div className="flex flex-col md:flex-row items-center gap-3">
-          <SearchForm setShowModal={setShowModal} />
+          <SearchForm setShowModal={setShowModal} searchText={searchText} searchHandler={searchHandler} />
 
           {/* Add new Employee Btn */}
           <button className="bg-[#2764ac] text-white w-[100px]  h-[30px] rounded-[5px] font-[Roboto] flex items-center justify-center gap-1" onClick={()=>setShowModal(true)}>
@@ -38,8 +38,8 @@ const ListContainer = ({loadingContent,paginationInfo,pageHandler,pageArrowHandl
         {
           loadingContent ? <LoadingSpinner/> : (
             <>
-              <CardList searchHandler={searchHandler} />
-              <Pagination paginationInfo={paginationInfo} pageHandler={pageHandler} pageArrowHandler={pageArrowHandler} />
+              <CardList pageNumber={pageNumber} numOfCard={numOfCard} searchText={searchText} />
+              <Pagination paginationInfo={paginationInfo} pageHandler={pageHandler} pageArrowHandler={pageArrowHandler} numOfCard={numOfCard} />
             </>
           )
         }

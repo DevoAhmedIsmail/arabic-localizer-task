@@ -1,6 +1,8 @@
 import React, { useContext, useEffect } from "react";
 import CardItem from "./CardItem";
 import { EmployeeContext } from "../../context/EmployeeProvider";
+import { useApolloClient, useQuery } from "@apollo/client";
+import { GET_COMPANY_USERS } from "../../graphql";
 
 // const DATA = [
 //     {
@@ -102,28 +104,25 @@ import { EmployeeContext } from "../../context/EmployeeProvider";
 //     },
 // ]
 
-const CardList = ({searchHandler}) => {
-  const { employees, searchText } = useContext(EmployeeContext);
-  const filteredEmployees = employees.filter((data) =>{
+const CardList = ({searchText,pageNumber,numOfCard}) => {
+  
+  const client = useApolloClient();
 
-    // console.log(data.name.toLowerCase().includes(searchText.toLowerCase()))
-   
-    return data.name.toLowerCase().includes(searchText.toLowerCase())
-  }
-  );
+  // Get Data from cache
+  const employees = client.readQuery({
+    query: GET_COMPANY_USERS,
+    variables: {first: numOfCard, page: pageNumber,input: searchText}
+  })
+  
+  // console.log("Read Query: ", employees.company_users.data);
 
-useEffect(()=>{
-  searchHandler(searchText)
-},[searchText])
-
-  console.log(employees);
   
 
   return (
     <div className="py-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-x-[20px] lg:gap-x-[15px] xl:gap-x-[30px] gap-y-[20px] xl:gap-y-[35px]">
-        {employees.length ? (
-          employees.map((data) => (
+        {employees.company_users?.data.length ? (
+          employees.company_users.data.map((data) => (
             <CardItem data={data} key={data.id} />
           ))
         ) : (

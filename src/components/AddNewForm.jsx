@@ -5,23 +5,32 @@ import { EmployeeContext } from "../context/EmployeeProvider";
 import { SelectInput } from "./Inputs";
 import ErrorSpan from "./ErrorSpan";
 import { MdClose } from "react-icons/md";
+import { GET_ALL_OPTIONS } from "../graphql";
+import { useQuery } from "@apollo/client";
 
 const AddNewForm = ({ closeModal }) => {
   const [userData, setUserData] = useState({
     name: "",
     image: "",
-    startDate: "",
+    starts_at: "",
     phone: "",
     email: "",
-    attendance: "",
+    attendance_type: "",
     department: "",
     manager: "",
     office: "",
     position: "",
     role: "",
-    workFromHome:false
+    can_work_home: false,
   });
-  // console.log(userData);
+
+  const [optionsDATA, setOptionsDATA] = useState({
+    departments: [],
+    positions: [],
+    offices: [],
+    attendance_profiles: [],
+    employeesName: [],
+  });
 
   const [isSaveForm, setIsSaveForm] = useState(false);
   const [errors, setErrors] = useState({});
@@ -29,6 +38,7 @@ const AddNewForm = ({ closeModal }) => {
   // to store image which come form user
   const [selectedImage, setSelectedImage] = useState(null);
 
+  // Add Employee to context
   const { addEmployee } = useContext(EmployeeContext);
 
   // Validations
@@ -53,7 +63,7 @@ const AddNewForm = ({ closeModal }) => {
     if (!userData.department) {
       errors.department = "Department is required";
     }
-    if (!userData.attendance) {
+    if (!userData.attendance_type) {
       errors.attendance = "Attendance is required";
     }
     if (!userData.office) {
@@ -62,7 +72,7 @@ const AddNewForm = ({ closeModal }) => {
     if (!userData.role) {
       errors.role = "Role is required";
     }
-    if (!userData.startDate) {
+    if (!userData.starts_at) {
       errors.startDate = "Start Date is required";
     }
     if (!userData.manager) {
@@ -120,11 +130,33 @@ const AddNewForm = ({ closeModal }) => {
     e.stopPropagation();
     setUserData((prev) => ({ ...prev, image: "" }));
   };
+
+  // Fetch from graphql
+  const { loading, error, data, refetch } = useQuery(GET_ALL_OPTIONS, {
+    variables: { first: 100 },
+    // fetchPolicy: "cache-first"
+  });
+
   useEffect(() => {
+    if (typeof data !== "undefined") {
+      // let depArr = data.company_departments.data.map((opt)=> opt.name)
+      // console.log(depArr);
+      setOptionsDATA({
+        departments: data.company_departments.data.map((opt) => opt.name),
+        offices: data.offices.data.map((opt) => opt.name),
+        attendance_profiles: data.attendance_profiles.data.map(
+          (opt) => opt.name
+        ),
+        positions: data.positions.data.map((opt) => opt.name),
+        employeesName: data.company_users.data.map((opt) => opt.name),
+      });
+      console.log(optionsDATA);
+    }
+
     if (isSaveForm) {
       validateForm();
     }
-  }, [userData]);
+  }, [userData, data]);
 
   const handleInputChange = (e) => {
     const { target } = e;
@@ -137,7 +169,7 @@ const AddNewForm = ({ closeModal }) => {
       style={{ backgroundColor: "rgba(40, 104, 174, 0.43)" }}
     >
       <div
-        className="bg-white pt-[11px] pb-[0px] p-5 max-h-[100vh] min-h-[710px] md:min-h-[691px] w-[90%] md:w-[700px] lg:w-[1000px] overflow-auto rounded-[4px]"
+        className="bg-white pt-[11px] pb-[0px] p-5 max-h-[100vh] min-h-[710px] md:min-h-[717px] w-[90%] md:w-[700px] lg:w-[1000px] overflow-auto rounded-[4px]"
         ref={wrapperRef}
       >
         <div className="border-b-2 border-[#23aaeb]  pb-3">
@@ -159,10 +191,7 @@ const AddNewForm = ({ closeModal }) => {
                 {/* close image */}
                 {userData.image && (
                   <div className="absolute top-2 right-2 font-bold text-red-400 cursor-pointer z-[100] w-5 h-5 bg-white rounded-full flex items-center justify-center">
-
-                    <MdClose
-                      onClick={(e) => cancelImage(e)}
-                    />
+                    <MdClose onClick={(e) => cancelImage(e)} />
                   </div>
                 )}
 
@@ -213,7 +242,7 @@ const AddNewForm = ({ closeModal }) => {
                   </div>
                   <div className="w-1/2 flex flex-col px-4 mb-4 relative">
                     <label
-                    htmlFor="startDate"
+                      htmlFor="starts_at"
                       className={`text-[13px] ${
                         errors.startDate ? "text-red-400" : "text-[#313030]"
                       }`}
@@ -221,22 +250,22 @@ const AddNewForm = ({ closeModal }) => {
                       Start Date
                     </label>
                     <input
-                      id="startDate"
-                      name="startDate"
+                      id="starts_at"
+                      name="starts_at"
                       type="date"
                       className={`border ${
                         errors.startDate
                           ? "border-red-400"
                           : "border-[#aaaaaad6]"
                       }  focus:outline-[#aaaaaad6] h-[30px] px-3 text-[13px] rounded`}
-                      value={userData.startDate}
+                      value={userData.starts_at}
                       onChange={handleInputChange}
                     />
                     {errors.startDate && <ErrorSpan text={errors.startDate} />}
                   </div>
                   <div className="w-1/2 flex flex-col px-4 mb-4 relative">
                     <label
-                    htmlFor="phone"
+                      htmlFor="phone"
                       className={`text-[13px] ${
                         errors.phone ? "text-red-400" : "text-[#313030]"
                       }`}
@@ -244,8 +273,8 @@ const AddNewForm = ({ closeModal }) => {
                       Phone
                     </label>
                     <input
-                    id="phone"
-                    name="phone"
+                      id="phone"
+                      name="phone"
                       className={`border ${
                         errors.phone ? "border-red-400" : "border-[#aaaaaad6]"
                       }  focus:outline-[#aaaaaad6] h-[30px] px-3 text-[13px] rounded`}
@@ -256,7 +285,7 @@ const AddNewForm = ({ closeModal }) => {
                   </div>
                   <div className="w-1/2 flex flex-col px-4 mb-4 relative">
                     <label
-                    htmlFor="email"
+                      htmlFor="email"
                       className={`text-[13px] ${
                         errors.email ? "text-red-400" : "text-[#313030]"
                       }`}
@@ -296,16 +325,17 @@ const AddNewForm = ({ closeModal }) => {
                 <SelectInput
                   id="office"
                   changeHandler={setUserData}
-                  options={["Arabic Localizer", "Microsoft", "IBM"]}
+                  options={optionsDATA.offices}
                   isError={errors.office}
                   value={userData.office}
+                  isLoading={loading}
                 />
                 {errors.office && <ErrorSpan text={errors.office} />}
               </div>
 
               <div className="w-1/2 flex flex-col  mb-4 relative">
                 <label
-                htmlFor="department"
+                  htmlFor="department"
                   className={`text-[13px] ${
                     errors.department ? "text-red-400" : "text-[#313030]"
                   }`}
@@ -314,12 +344,9 @@ const AddNewForm = ({ closeModal }) => {
                 </label>
                 <SelectInput
                   id="department"
+                  isLoading={loading}
                   changeHandler={setUserData}
-                  options={[
-                    "Business Development",
-                    "Chemistry Department",
-                    "Agriculture Department",
-                  ]}
+                  options={optionsDATA.departments}
                   isError={errors.department}
                   value={userData.department}
                 />
@@ -331,16 +358,17 @@ const AddNewForm = ({ closeModal }) => {
                   className={`text-[13px] ${
                     errors.attendance ? "text-red-400" : "text-[#313030]"
                   }`}
-                  htmlFor="attendance"
+                  htmlFor="attendance_type"
                 >
                   Attendance Profile
                 </label>
                 <SelectInput
-                  id="attendance"
+                  id="attendance_type"
+                  isLoading={loading}
                   changeHandler={setUserData}
-                  options={["Weekend", "Present", "Absent"]}
+                  options={optionsDATA.attendance_profiles}
                   isError={errors.attendance}
-                  value={userData.attendance}
+                  value={userData.attendance_type}
                 />
                 {errors.attendance && <ErrorSpan text={errors.attendance} />}
               </div>
@@ -356,6 +384,7 @@ const AddNewForm = ({ closeModal }) => {
                 </label>
                 <SelectInput
                   id="role"
+                  isLoading={loading}
                   changeHandler={setUserData}
                   options={["Manager", "Employee", "Customer"]}
                   isError={errors.role}
@@ -375,8 +404,9 @@ const AddNewForm = ({ closeModal }) => {
                 </label>
                 <SelectInput
                   id="position"
+                  isLoading={loading}
                   changeHandler={setUserData}
-                  options={["HR Head", "Manager", "Worker"]}
+                  options={optionsDATA.positions}
                   isError={errors.position}
                   value={userData.position}
                 />
@@ -394,8 +424,9 @@ const AddNewForm = ({ closeModal }) => {
                 </label>
                 <SelectInput
                   id="manager"
+                  isLoading={loading}
                   changeHandler={setUserData}
-                  options={["Ahmed Ismail", "Malek Mohammed"]}
+                  options={optionsDATA.employeesName}
                   isError={errors.manager}
                   value={userData.manager}
                 />
@@ -407,9 +438,21 @@ const AddNewForm = ({ closeModal }) => {
             <ModalTitle text="Work From Home" />
 
             <div className="flex items-center gap-2">
-              <input type="checkbox" id="allow" checked={userData.workFromHome} onChange={(e)=> setUserData((prev)=>({...prev, workFromHome: !prev.workFromHome}))} />
+              <input
+                type="checkbox"
+                id="allow"
+                checked={userData.can_work_home}
+                onChange={(e) =>
+                  setUserData((prev) => ({
+                    ...prev,
+                    can_work_home: !prev.can_work_home,
+                  }))
+                }
+              />
               <label
-                className={`text-[13px] ${userData.workFromHome && 'font-bold'} text-[#313030]`}
+                className={`text-[13px] ${
+                  userData.can_work_home && "font-bold"
+                } text-[#313030]`}
                 htmlFor="allow"
               >
                 Allow Employee To Work From Home
@@ -425,7 +468,12 @@ const AddNewForm = ({ closeModal }) => {
               >
                 Cancel
               </button>
-              <Button text="Save" color="#23aaeb" fontSize="13px" onSubmit={handleSubmit} />
+              <Button
+                text="Save"
+                color="#23aaeb"
+                fontSize="13px"
+                onSubmit={handleSubmit}
+              />
             </div>
           </form>
         </div>

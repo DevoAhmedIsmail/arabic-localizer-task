@@ -9,7 +9,7 @@ import { MdCallEnd } from "react-icons/md";
 import AttendLabel from "./AttendLabel";
 import { EmployeeContext } from "../../context/EmployeeProvider";
 
-const CardItem = ({ data }) => {
+const CardItem = ({ data, }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
@@ -61,7 +61,7 @@ const CardItem = ({ data }) => {
           </div>
         </div>
         <div className="col-start-1 md:col-start-4 col-end-13 pl-0 md:pl-[20px] h-full ">
-          <div className="border-t md:border-t-0 border-l-0 md:border-l border-[#8997a440] h-full pl-0 md:pl-5">
+          <div className="border-t md:border-t-0 border-l-0 md:border-l border-[#8997a440] h-full pl-0 md:pl-5 flex flex-col justify-between">
             <div className="text-center md:text-left relative">
               <p className="text-[20px] text-[#5c6974] font-[Lato] capitalize text-overflow leading-[1] mb-[5px]" onMouseEnter={(e)=>isEllipsisActive(e)} onMouseLeave={()=>setShowName(false)}>
                 {data.name}

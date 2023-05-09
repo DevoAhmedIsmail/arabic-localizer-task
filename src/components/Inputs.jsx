@@ -1,9 +1,28 @@
 import React from "react";
+import Select from 'react-select';
 
-export const SelectInput = ({ id, changeHandler, options, isError, value }) => {
-  // console.log(id,'=>>',value);
+export const SelectInput = ({ id, changeHandler, options, isError, value,isLoading }) => {
+
   return (
-    <select
+    <Select
+      //  classNamePrefix="select"
+       defaultValue={value}
+       onChange={(e) =>
+        changeHandler((prev) => ({ ...prev, [id]: e.value }))
+      }
+       isLoading={isLoading}
+       // isClearable={isClearable}
+       isSearchable={false}
+       name=""
+       options={options.map(option=>({value: option,label: option}))}
+      //  value={value}
+      />
+  );
+};
+
+
+/*
+<select
       name=""
       id={id}
       className={`px-3 border ${
@@ -25,5 +44,18 @@ export const SelectInput = ({ id, changeHandler, options, isError, value }) => {
         </option>
       ))}
     </select>
-  );
-};
+*/
+
+/*
+ <Select
+       classNamePrefix="select"
+       defaultValue={options[0]}
+       onChange={(e) => changeHandler(e.target.value)}
+       isLoading={loading}
+       // isClearable={isClearable}
+       isSearchable={false}
+       name=""
+       options={options.map(option=>({value: option,label: option}))}
+       value={value}
+      />
+*/
