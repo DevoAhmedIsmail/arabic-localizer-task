@@ -1,0 +1,52 @@
+import "./App.css";
+import ListContainer from "./components/ListContainer";
+import Layout from "./pages/Layout";
+import { useQuery } from "@apollo/client";
+import { useContext, useEffect } from "react";
+import { EmployeeContext } from "./context/EmployeeProvider";
+import LoadingSpinner from "./components/LoadingSpinner";
+import { GET_COMPANY_USERS } from "./queries";
+
+
+function App() {
+  const [pageNumber, setPageNumber] = useState(1)
+  const { loading, error, data } = useQuery(GET_COMPANY_USERS,{
+    variables: {first: 16, page: pageNumber,input: ""}
+  })
+  
+  const {setAllEmployees} = useContext(EmployeeContext);
+ 
+  // Change page number
+  const pageHandler = (num)=>{
+    setPageNumber(num)
+  }
+
+  // Change page with arrow
+  const pageArrowHandler = (num)=>{
+    setPageNumber(pageNumber+num)
+  }
+
+  // Search
+  const searchHandler = (text)=>{
+    setPageNumber(1)
+  }
+  
+  useEffect(()=>{
+    // console.log("Pagination",data.company_users.paginatorInfo);
+    data && setAllEmployees(data.company_users.data)
+  },[data])
+
+  if (error) return <p>Error: {error.message}</p>;
+  // console.log(data.company_users.data);
+
+
+  return (
+    <div className="App">
+      <Layout>
+        <ListContainer loadingContent={loading} paginationInfo={data?.company_users.paginatorInfo} pageHandler={pageHandler} pageArrowHandler={pageArrowHandler} searchHandler={searchHandler} />
+      </Layout>
+    </div>
+  );
+}
+
+export default App;
