@@ -16,7 +16,7 @@ function App() {
   const [searchText, setSearchText] = useState("");
   const { loading, error, data, refetch } = useQuery(GET_COMPANY_USERS, {
     variables: { first: numOfCard, page: pageNumber, input: searchText },
-    // fetchPolicy: "cache-and-network"
+    fetchPolicy: "cache-first"
   });
 
   // const { setAllEmployees } = useContext(EmployeeContext);
@@ -42,7 +42,7 @@ function App() {
 
   useEffect(() => {
     // data && setAllEmployees(data.company_users.data);
-    // console.log(data);
+    console.log(data);
   }, [data]);
 
   if (error) return <p>Error: {error.message}</p>;

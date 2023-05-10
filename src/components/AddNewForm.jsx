@@ -8,14 +8,14 @@ import { MdClose } from "react-icons/md";
 import { GET_ALL_OPTIONS } from "../graphql";
 import { useQuery } from "@apollo/client";
 
-const AddNewForm = ({ closeModal }) => {
+const AddNewForm = ({ closeModal, userDataToEdit }) => {
   const [userData, setUserData] = useState({
     name: "",
     image: "",
     starts_at: "",
     phone: "",
     email: "",
-    attendance_type: "",
+    attendance_profile: "",
     department: "",
     manager: "",
     office: "",
@@ -30,6 +30,7 @@ const AddNewForm = ({ closeModal }) => {
     offices: [],
     attendance_profiles: [],
     employeesName: [],
+    roles: []
   });
 
   const [isSaveForm, setIsSaveForm] = useState(false);
@@ -63,7 +64,7 @@ const AddNewForm = ({ closeModal }) => {
     if (!userData.department) {
       errors.department = "Department is required";
     }
-    if (!userData.attendance_type) {
+    if (!userData.attendance_profile) {
       errors.attendance = "Attendance is required";
     }
     if (!userData.office) {
@@ -103,7 +104,8 @@ const AddNewForm = ({ closeModal }) => {
       // console.log('Form submitted:', { name, email, phone });
       // Do something with the form data
 
-      addEmployee(userData);
+      // addEmployee(userData);
+      
 
       closeModal();
       // setIsSaveForm(false);
@@ -112,6 +114,39 @@ const AddNewForm = ({ closeModal }) => {
 
   const wrapperRef = useRef(null);
   useEffect(() => {
+    
+    if(userDataToEdit.id !== undefined) {
+      setUserData({
+        name: userDataToEdit.name,
+        image: userDataToEdit.img_path,
+        starts_at: userDataToEdit.starts_at,
+        phone: userDataToEdit.phone,
+        email: userDataToEdit.email,
+        attendance_profile: userDataToEdit.attendance_profile?.name,
+        department: userDataToEdit.department?.name,
+        manager: userDataToEdit.manager?.name,
+        office: userDataToEdit.office?.name,
+        position: userDataToEdit.position?.name,
+        can_work_home: userDataToEdit.can_work_home,
+      })
+    }else {
+      setUserData({
+
+        name: "",
+      image: "",
+      starts_at: "",
+      phone: "",
+      email: "",
+      attendance_profile: "",
+      department: "",
+      manager: "",
+      office: "",
+      position: "",
+      role: "",
+      can_work_home: false,
+      })
+    }
+    
     const handleClickOutside = (event) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
         closeModal();
@@ -123,7 +158,7 @@ const AddNewForm = ({ closeModal }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [wrapperRef]);
+  }, [wrapperRef,userDataToEdit]);
 
   // Cancel Image
   const cancelImage = (e) => {
@@ -140,17 +175,17 @@ const AddNewForm = ({ closeModal }) => {
   useEffect(() => {
     if (typeof data !== "undefined") {
       // let depArr = data.company_departments.data.map((opt)=> opt.name)
-      // console.log(depArr);
       setOptionsDATA({
         departments: data.company_departments.data.map((opt) => opt.name),
         offices: data.offices.data.map((opt) => opt.name),
         attendance_profiles: data.attendance_profiles.data.map(
           (opt) => opt.name
-        ),
-        positions: data.positions.data.map((opt) => opt.name),
-        employeesName: data.company_users.data.map((opt) => opt.name),
-      });
-      console.log(optionsDATA);
+          ),
+          positions: data.positions.data.map((opt) => opt.name),
+          employeesName: data.company_users.data.map((opt) => opt.name),
+          roles: data.profile.company.currentSubscription.plan.roles.map((role)=> role.name)
+        });
+        // console.log(optionsDATA);
     }
 
     if (isSaveForm) {
@@ -368,7 +403,7 @@ const AddNewForm = ({ closeModal }) => {
                   changeHandler={setUserData}
                   options={optionsDATA.attendance_profiles}
                   isError={errors.attendance}
-                  value={userData.attendance_type}
+                  value={userData.attendance_profile}
                 />
                 {errors.attendance && <ErrorSpan text={errors.attendance} />}
               </div>
@@ -386,7 +421,7 @@ const AddNewForm = ({ closeModal }) => {
                   id="role"
                   isLoading={loading}
                   changeHandler={setUserData}
-                  options={["Manager", "Employee", "Customer"]}
+                  options={optionsDATA.roles}
                   isError={errors.role}
                   value={userData.role}
                 />
@@ -469,7 +504,7 @@ const AddNewForm = ({ closeModal }) => {
                 Cancel
               </button>
               <Button
-                text="Save"
+                text={`${userDataToEdit.id == undefined ? "Save" : "Update"}`}
                 color="#23aaeb"
                 fontSize="13px"
                 onSubmit={handleSubmit}

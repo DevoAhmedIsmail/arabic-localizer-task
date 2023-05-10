@@ -3,10 +3,9 @@ import Select from 'react-select';
 import '../App.css'
 
 export const SelectInput = ({ id, changeHandler, options, isError, value,isLoading }) => {
-
   return (
     <Select
-       defaultValue={value}
+    value={{value: value || 'Select', label: value|| 'Select'} }
        classNamePrefix="react-select"
        onChange={(e) =>
         changeHandler((prev) => ({ ...prev, [id]: e.value }))

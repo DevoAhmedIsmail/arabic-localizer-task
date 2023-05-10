@@ -9,9 +9,17 @@ import Pagination from "./Pagination";
 
 const ListContainer = ({loadingContent,paginationInfo,pageHandler,pageArrowHandler,searchHandler,pageNumber, numOfCard, searchText}) => {
   const [showModal, setShowModal] = useState(false);
+  const [userDataToEdit, setUserDataToEdit] = useState([])
   const closeModal = () => {
     setShowModal(false);
+    setUserDataToEdit([])
   };
+
+  const showModalHandler = (data)=>{
+    setShowModal(true);
+    setUserDataToEdit(data)
+    // console.log(data);
+  }
 
   useEffect(() => {
     if (showModal) {
@@ -38,13 +46,13 @@ const ListContainer = ({loadingContent,paginationInfo,pageHandler,pageArrowHandl
         {
           loadingContent ? <LoadingSpinner/> : (
             <>
-              <CardList pageNumber={pageNumber} numOfCard={numOfCard} searchText={searchText} />
+              <CardList pageNumber={pageNumber} numOfCard={numOfCard} searchText={searchText} showModalHandler={showModalHandler} />
               <Pagination paginationInfo={paginationInfo} pageHandler={pageHandler} pageArrowHandler={pageArrowHandler} numOfCard={numOfCard} />
             </>
           )
         }
         
-        {showModal && <AddNewForm closeModal={closeModal} />}
+        {showModal && <AddNewForm closeModal={closeModal} userDataToEdit={userDataToEdit} />}
       </div>
     </div>
   );

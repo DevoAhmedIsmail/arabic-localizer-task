@@ -69,3 +69,24 @@
 .react-select__indicator-separator {
     margin-bottom: 7px!important;
 }
+
+/* .react-select__menu {
+    background-color: #eee!important;
+    color: #2763ab!important;
+} */
+
+.react-select__option {
+    background-color: #eee!important;
+    color: #2763ab!important;
+
+}
+
+.react-select__option:hover {
+    background-color: #2763ab!important;
+    color: #fff!important;
+
+}
+
+.swal2-actions {
+    gap: 18px;
+}

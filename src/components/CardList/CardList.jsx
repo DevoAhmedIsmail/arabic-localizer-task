@@ -104,7 +104,7 @@ import { GET_COMPANY_USERS } from "../../graphql";
 //     },
 // ]
 
-const CardList = ({searchText,pageNumber,numOfCard}) => {
+const CardList = ({searchText,pageNumber,numOfCard,showModalHandler}) => {
   
   const client = useApolloClient();
 
@@ -123,7 +123,7 @@ const CardList = ({searchText,pageNumber,numOfCard}) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-x-[20px] lg:gap-x-[15px] xl:gap-x-[30px] gap-y-[20px] xl:gap-y-[35px]">
         {employees.company_users?.data.length ? (
           employees.company_users.data.map((data) => (
-            <CardItem data={data} key={data.id} />
+            <CardItem data={data} key={data.id} searchText={searchText} pageNumber={pageNumber} numOfCard={numOfCard} showModalHandler={showModalHandler} />
           ))
         ) : (
           <p className="text-sm text-[#8997a4] px-3 font-bolder tracking-wide">Sorry , There is no Employee ...</p>

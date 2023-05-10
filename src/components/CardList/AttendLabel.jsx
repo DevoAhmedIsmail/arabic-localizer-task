@@ -23,6 +23,11 @@ const AttendLabel = ({ text }) => {
       backgroundColor: "#27b40c29",
       color: "#27b40c",
     };
+  }else {
+    labelStyle = {
+      backgroundColor: "#27b40c29",
+      color: "#27b40c",
+    };
   }
 
   return (
