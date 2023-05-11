@@ -10,24 +10,30 @@ export const GET_COMPANY_USERS = gql`
         starts_at
         phone
         email
-        attendance_profile{
+        attendance_profile {
           name
+          id
         }
         can_work_home
         department {
           name
+          id
         }
         manager {
           name
+          id
         }
         copied_managers {
           name
+          id
         }
         office {
           name
+          id
         }
         position {
           name
+          id
         }
         # role
       }
@@ -43,35 +49,41 @@ export const GET_COMPANY_USERS = gql`
 
 export const GET_USER_BY_ID = gql`
   query get_user($id: ID!) {
-  user(id: $id) {
-    id
-    name
-    img_path
-    starts_at
-    phone
-    email
-    attendance_profile{
-          name
-        }
-    can_work_home
-    department {
+    user(id: $id) {
+      id
       name
-    }
-    manager {
-      name
-    }
-    copied_managers {
-      name
-    }
-    office {
-      name
-    }
-    position {
-      name
+      img_path
+      starts_at
+      phone
+      email
+      attendance_profile {
+        name
+        id
+      }
+      can_work_home
+      department {
+        name
+        id
+      }
+      manager {
+        name
+        id
+      }
+      copied_managers {
+        name
+        id
+      }
+      office {
+        name
+        id
+      }
+      position {
+        name
+        id
+      }
     }
   }
-} 
-`
+`;
 
 // export const GET_DEPARTMENTS = gql`
 //   query get_department {
@@ -136,21 +148,25 @@ export const GET_ALL_OPTIONS = gql`
     company_departments(first: $first) {
       data {
         name
+        id
       }
     }
     positions(first: $first) {
       data {
         name
+        id
       }
     }
     attendance_profiles(first: $first) {
       data {
         name
+        id
       }
     }
     offices(first: $first) {
       data {
         name
+        id
       }
     }
     profile {
@@ -159,6 +175,7 @@ export const GET_ALL_OPTIONS = gql`
           plan {
             roles {
               name
+              id
             }
           }
         }
@@ -176,15 +193,54 @@ export const DELETE_USER = gql`
   }
 `;
 
+export const UPDATE_USER = gql`
+  mutation updateUser($ext: UserInput!) {
+  update_user(input: { user_input: $ext }) {
+    id
+      name
+      img_path
+      starts_at
+      phone
+      email
+      attendance_profile {
+        name
+        id
+      }
+      can_work_home
+      department {
+        name
+        id
+      }
+      manager {
+        name
+        id
+      }
+      copied_managers {
+        name
+        id
+      }
+      office {
+        name
+        id
+      }
+      position {
+        name
+        id
+      }
+  }
+}
+`;
+
 /* 
 
     TODO GET USER ✔️
-    TODO GET Roles from company>>currentSubscription>>plan>>roles 
+    TODO GET Roles from company>>currentSubscription>>plan>>roles ✔️
     TODO GET departments ✔️
     TODO GET positions ✔️
     TODO GET attendance_profile ✔️
     TODO GET office ✔️
     TODO GET direct manager from users name ✔️
-    TODO DELETE USER 🚀
-    TODO UPDATE USER
+    TODO DELETE USER ✔️
+    TODO UPDATE USER 🚀
+    TODO Add USER 
  */

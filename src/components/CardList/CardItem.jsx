@@ -13,7 +13,13 @@ import { useMutation, useApolloClient } from "@apollo/client";
 import { DELETE_USER, GET_COMPANY_USERS } from "../../graphql";
 import LoadingSpinner from "../LoadingSpinner";
 
-const CardItem = ({ data,searchText,pageNumber,numOfCard,showModalHandler }) => {
+const CardItem = ({
+  data,
+  searchText,
+  pageNumber,
+  numOfCard,
+  showModalHandler,
+}) => {
   const [showDetails, setShowDetails] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
@@ -47,91 +53,97 @@ const CardItem = ({ data,searchText,pageNumber,numOfCard,showModalHandler }) => 
       })
       .then((result) => {
         if (result.isConfirmed) {
-          const { value: password } = swalWithClasses.fire({
-            title: "Enter your password",
-            input: "password",
-            confirmButtonText: "Delete",
-            inputPlaceholder: "Enter your password",
-            inputAttributes: {
-              maxlength: 10,
-              autocapitalize: "off",
-              autocorrect: "off",
-            },
-          }).then((res) => {
-            if (res.value === "123456") {
-              deleteUserQL({
-                variables: { id: data.id, password: res.value },
-                refetchQueries: [{query: GET_COMPANY_USERS,variables: {first: numOfCard, page: pageNumber,input: searchText}}],
-                // TODO: not working
-                update(cache, {data}) {
-
-                  // const {company_users} = cache.readQuery({query: GET_COMPANY_USERS});
-                  // cache.writeQuery({
-                  //   query: GET_COMPANY_USERS,
-                  //   data: {
-                  //     company_users: {
-                  //       data: company_users.data.filter(user=> user.id !== id) 
-                  //     } 
-                  //   }
-                  // })
-
-                  // cache.modify({
-                  //   fields: {
-                  //     company_users(existingUsers,{readField}) {
-                  //       console.log(existingUsers);
-                  //       return existingUsers.data.filter(userRef=> data.id !==readField('id', userRef))
-                  //     }
-                  //   }
-                  // })
-
-                  // cache.modify({
-                  //   id: cache.identify(data),
-                  //   fields: {
-                  //     company_users(existingUsers, {DELETE}){
-                  //       return DELETE
-                  //     }
-                  //   }
-                  // })
-                },
-              }).then((res) => {
-                console.log(res);
-                if (res.data.delete_user.status === "success") {
-                  Swal.fire({
-                    timer: 2000,
-                    title: "The User is deleted",
-                    icon: 'success'
+          const { value: password } = swalWithClasses
+            .fire({
+              title: "Enter your password",
+              input: "password",
+              confirmButtonText: "Delete",
+              inputPlaceholder: "Enter your password",
+              inputAttributes: {
+                maxlength: 10,
+                autocapitalize: "off",
+                autocorrect: "off",
+              },
+            })
+            .then((res) => {
+              if (res.value === "123456") {
+                deleteUserQL({
+                  variables: { id: data.id, password: res.value },
+                  refetchQueries: [
+                    {
+                      query: GET_COMPANY_USERS,
+                      variables: {
+                        first: numOfCard,
+                        page: pageNumber,
+                        input: searchText,
+                      },
+                    },
+                  ],
+                  // TODO: not working
+                  update(cache, { data }) {
+                    // const {company_users} = cache.readQuery({query: GET_COMPANY_USERS});
+                    // cache.writeQuery({
+                    //   query: GET_COMPANY_USERS,
+                    //   data: {
+                    //     company_users: {
+                    //       data: company_users.data.filter(user=> user.id !== id)
+                    //     }
+                    //   }
+                    // })
+                    // cache.modify({
+                    //   fields: {
+                    //     company_users(existingUsers,{readField}) {
+                    //       console.log(existingUsers);
+                    //       return existingUsers.data.filter(userRef=> data.id !==readField('id', userRef))
+                    //     }
+                    //   }
+                    // })
+                    // cache.modify({
+                    //   id: cache.identify(data),
+                    //   fields: {
+                    //     company_users(existingUsers, {DELETE}){
+                    //       return DELETE
+                    //     }
+                    //   }
+                    // })
+                  },
+                })
+                  .then((res) => {
+                    console.log(res);
+                    if (res.data.delete_user.status === "success") {
+                      Swal.fire({
+                        timer: 2000,
+                        title: "The User is deleted",
+                        icon: "success",
+                      });
+                    } else {
+                      swalWithClasses.fire(
+                        "Error!",
+                        res.data.delete_user.message,
+                        "Error"
+                      );
+                    }
+                  })
+                  .catch((error) => {
+                    console.log(error);
+                    swalWithClasses.fire("Error!", error.message, "Error");
                   });
-                } else {
-                  swalWithClasses.fire(
-                    "Error!",
-                    res.data.delete_user.message,
-                    "Error"
-                  );
-                }
-              }).catch(error=>{
-                console.log(error);
-                swalWithClasses.fire(
-                  "Error!",
-                  error.message,
-                  "Error"
-                );
-              });
-            } else {
-              Swal.fire({
-                timer: 2000,
-                title: "Incorrect password",
-                icon: 'warning',
-                showConfirmButton: false
-              });
-            }
-          });
+              } else {
+                Swal.fire({
+                  timer: 2000,
+                  title: "Incorrect password",
+                  icon: "warning",
+                  showConfirmButton: false,
+                });
+              }
+            });
         }
       });
   };
 
-  const UpdateUserHandler = (id) =>{
-    showModalHandler(data)
-  }
+  const UpdateUserHandler = (id) => {
+    showModalHandler(data);
+  };
   const wrapperRef = useRef(null);
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -156,7 +168,11 @@ const CardItem = ({ data,searchText,pageNumber,numOfCard,showModalHandler }) => 
   }
   return (
     <div className="card-item bg-white pl-4 pr-3 py-3">
-      {LoadingDelete && <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"><LoadingSpinner /></div>}
+      {LoadingDelete && (
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+          <LoadingSpinner />
+        </div>
+      )}
       <div className="grid grid-cols-12">
         <div className="col-start-1 col-end-13 md:col-end-4">
           <div>
@@ -170,7 +186,10 @@ const CardItem = ({ data,searchText,pageNumber,numOfCard,showModalHandler }) => 
               className="w-[100px] h-[100px] md:w-[64px] md:h-[64px] rounded-full object-cover mx-auto"
             />
             <div className="flex justify-center gap-10 md:gap-0 md:justify-between items-center text-[#8997a4] text-[14px] mt-[15px] md:mt-[17px] mb-5 md:mb-0">
-              <HiPencil className="" onClick={()=> UpdateUserHandler(data.is)} />
+              <HiPencil
+                className="hover:text-cyan-400 cursor-pointer"
+                onClick={() => UpdateUserHandler(data.is)}
+              />
               <AiOutlinePauseCircle className="" />
               <RiDeleteBin2Fill
                 className="hover:text-red-400 cursor-pointer"

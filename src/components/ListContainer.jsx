@@ -10,6 +10,13 @@ import Pagination from "./Pagination";
 const ListContainer = ({loadingContent,paginationInfo,pageHandler,pageArrowHandler,searchHandler,pageNumber, numOfCard, searchText}) => {
   const [showModal, setShowModal] = useState(false);
   const [userDataToEdit, setUserDataToEdit] = useState([])
+  const [loadingUpdate, setloadingUpdate] = useState(false);
+
+  // Loading when update
+  const handelLoading = (status)=>{
+    setloadingUpdate(status)
+  }
+
   const closeModal = () => {
     setShowModal(false);
     setUserDataToEdit([])
@@ -33,6 +40,11 @@ const ListContainer = ({loadingContent,paginationInfo,pageHandler,pageArrowHandl
   }, [showModal]);
   return (
     <div className="pl-[35px] pr-[18px] pt-2 min-h-full ">
+      {loadingUpdate && (
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+          <LoadingSpinner />
+        </div>
+      )}
       <div className="bg-[#f7f8f9] px-3 py-5">
         <div className="flex flex-col md:flex-row items-center gap-3">
           <SearchForm setShowModal={setShowModal} searchText={searchText} searchHandler={searchHandler} />
@@ -52,7 +64,7 @@ const ListContainer = ({loadingContent,paginationInfo,pageHandler,pageArrowHandl
           )
         }
         
-        {showModal && <AddNewForm closeModal={closeModal} userDataToEdit={userDataToEdit} />}
+        {showModal && <AddNewForm closeModal={closeModal} userDataToEdit={userDataToEdit} pageNumber={pageNumber} numOfCard={numOfCard} updateLoading={searchText} handelLoading={handelLoading} />}
       </div>
     </div>
   );

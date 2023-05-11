@@ -5,22 +5,30 @@ import { EmployeeContext } from "../context/EmployeeProvider";
 import { SelectInput } from "./Inputs";
 import ErrorSpan from "./ErrorSpan";
 import { MdClose } from "react-icons/md";
-import { GET_ALL_OPTIONS } from "../graphql";
-import { useQuery } from "@apollo/client";
+import { GET_ALL_OPTIONS, GET_COMPANY_USERS, UPDATE_USER } from "../graphql";
+import { useApolloClient, useMutation, useQuery } from "@apollo/client";
+import LoadingSpinner from "./LoadingSpinner";
 
-const AddNewForm = ({ closeModal, userDataToEdit }) => {
+const AddNewForm = ({
+  closeModal,
+  userDataToEdit,
+  pageNumber,
+  numOfCard,
+  searchText,
+  handelLoading
+}) => {
   const [userData, setUserData] = useState({
     name: "",
-    image: "",
+    img_path: "",
     starts_at: "",
     phone: "",
     email: "",
-    attendance_profile: "",
-    department: "",
-    manager: "",
-    office: "",
-    position: "",
-    role: "",
+    attendance_profile: 0,
+    department: 0,
+    manager: 0,
+    office: 0,
+    position: 0,
+    role: 0,
     can_work_home: false,
   });
 
@@ -30,7 +38,7 @@ const AddNewForm = ({ closeModal, userDataToEdit }) => {
     offices: [],
     attendance_profiles: [],
     employeesName: [],
-    roles: []
+    roles: [],
   });
 
   const [isSaveForm, setIsSaveForm] = useState(false);
@@ -70,9 +78,9 @@ const AddNewForm = ({ closeModal, userDataToEdit }) => {
     if (!userData.office) {
       errors.office = "Office is required";
     }
-    if (!userData.role) {
-      errors.role = "Role is required";
-    }
+    // if (!userData.role) {
+    //   errors.role = "Role is required";
+    // }
     if (!userData.starts_at) {
       errors.startDate = "Start Date is required";
     }
@@ -91,62 +99,113 @@ const AddNewForm = ({ closeModal, userDataToEdit }) => {
       setSelectedImage(imageFile);
       setUserData((prev) => ({
         ...prev,
-        image: URL.createObjectURL(imageFile),
+        img_path: URL.createObjectURL(imageFile),
       }));
     }
   };
 
+  // Fetch from graphql
+  const { loading, error, data, refetch } = useQuery(GET_ALL_OPTIONS, {
+    variables: { first: 100 },
+    // fetchPolicy: "cache-first"
+  });
+
+  // Push Values to api
+  const [updateUserQL, { loading: updateLoading }] = useMutation(UPDATE_USER);
+
   // Submit Form
   function handleSubmit(e) {
-    setIsSaveForm(true);
     e.preventDefault();
     if (validateForm()) {
+      handelLoading(true)
       // console.log('Form submitted:', { name, email, phone });
       // Do something with the form data
-
-      // addEmployee(userData);
-      
+      console.log(userData);
+      updateUserQL({
+        variables: {
+          ext: {
+            id: userDataToEdit?.id,
+            name: userData.name,
+            starts_at: userData.starts_at,
+            email: userData.email,
+            phone: userData.phone,
+            department_id: userData.department,
+            manager_id: userData.manager,
+            company_id: userData.office,
+            office_id: userData.office,
+            has_credentials: 0,
+            position_id: userData.position,
+            att_profile_id: userData.attendance_profile,
+            can_work_home: userData.can_work_home,
+            max_homeDays_per_week: 0,
+            flexible_home: 0,
+            can_ex_days: 0,
+            copied_managers: userData.manager,
+          },
+        },
+        refetchQueries: [
+          {
+            query: GET_COMPANY_USERS,
+            variables: {
+              first: numOfCard,
+              page: pageNumber,
+              input: searchText,
+            },
+          },
+        ],
+      }).then(()=>{
+        handelLoading(false)
+      }).catch((error) => {
+        let { graphQLErrors } = error;
+        // if (graphQLErrors[0].extensions.category === "validation") {
+        //   console.log(graphQLErrors[0].extensions.validation);
+        // }
+        console.log(error);
+      });
 
       closeModal();
       // setIsSaveForm(false);
     }
   }
 
+  // get Label
+  const getLabel = (id, arr) => {
+    return arr.find((ele) => ele.id == id);
+  };
+
   const wrapperRef = useRef(null);
   useEffect(() => {
-    
-    if(userDataToEdit.id !== undefined) {
+    if (userDataToEdit.id !== undefined) {
       setUserData({
         name: userDataToEdit.name,
-        image: userDataToEdit.img_path,
+        img_path: userDataToEdit.img_path,
         starts_at: userDataToEdit.starts_at,
         phone: userDataToEdit.phone,
         email: userDataToEdit.email,
-        attendance_profile: userDataToEdit.attendance_profile?.name,
-        department: userDataToEdit.department?.name,
-        manager: userDataToEdit.manager?.name,
-        office: userDataToEdit.office?.name,
-        position: userDataToEdit.position?.name,
+        attendance_profile: userDataToEdit.attendance_profile?.id,
+        department: userDataToEdit.department?.id,
+        manager: userDataToEdit.manager?.id,
+        office: userDataToEdit.office?.id,
+        position: userDataToEdit.position?.id,
         can_work_home: userDataToEdit.can_work_home,
-      })
-    }else {
+      });
+    } else {
       setUserData({
-
         name: "",
-      image: "",
-      starts_at: "",
-      phone: "",
-      email: "",
-      attendance_profile: "",
-      department: "",
-      manager: "",
-      office: "",
-      position: "",
-      role: "",
-      can_work_home: false,
-      })
+        img_path: "",
+        starts_at: "",
+        phone: "",
+        email: "",
+        attendance_profile: "",
+        department: "",
+        manager: "",
+        office: "",
+        position: "",
+        role: "",
+        can_work_home: false,
+      });
     }
-    
+
     const handleClickOutside = (event) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
         closeModal();
@@ -158,34 +217,26 @@ const AddNewForm = ({ closeModal, userDataToEdit }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [wrapperRef,userDataToEdit]);
+  }, [wrapperRef, userDataToEdit]);
 
   // Cancel Image
   const cancelImage = (e) => {
     e.stopPropagation();
-    setUserData((prev) => ({ ...prev, image: "" }));
+    setUserData((prev) => ({ ...prev, img_path: "" }));
   };
 
-  // Fetch from graphql
-  const { loading, error, data, refetch } = useQuery(GET_ALL_OPTIONS, {
-    variables: { first: 100 },
-    // fetchPolicy: "cache-first"
-  });
-
   useEffect(() => {
+    // console.log('Label: ', getLabel(userData.attendance_profile,optionsDATA.attendance_profiles)?.name);
     if (typeof data !== "undefined") {
-      // let depArr = data.company_departments.data.map((opt)=> opt.name)
       setOptionsDATA({
-        departments: data.company_departments.data.map((opt) => opt.name),
-        offices: data.offices.data.map((opt) => opt.name),
-        attendance_profiles: data.attendance_profiles.data.map(
-          (opt) => opt.name
-          ),
-          positions: data.positions.data.map((opt) => opt.name),
-          employeesName: data.company_users.data.map((opt) => opt.name),
-          roles: data.profile.company.currentSubscription.plan.roles.map((role)=> role.name)
-        });
-        // console.log(optionsDATA);
+        departments: data.company_departments.data,
+        offices: data.offices.data,
+        attendance_profiles: data.attendance_profiles.data,
+        positions: data.positions.data,
+        employeesName: data.company_users.data,
+        roles: data.profile.company.currentSubscription.plan.roles,
+      });
+      // console.log(optionsDATA);
     }
 
     if (isSaveForm) {
@@ -224,7 +275,7 @@ const AddNewForm = ({ closeModal, userDataToEdit }) => {
                   onChange={handleImageUpload}
                 />
                 {/* close image */}
-                {userData.image && (
+                {userData.img_path && (
                   <div className="absolute top-2 right-2 font-bold text-red-400 cursor-pointer z-[100] w-5 h-5 bg-white rounded-full flex items-center justify-center">
                     <MdClose onClick={(e) => cancelImage(e)} />
                   </div>
@@ -236,12 +287,12 @@ const AddNewForm = ({ closeModal, userDataToEdit }) => {
                   >
                     <span
                       className={`text-[13px] font-normal text-center text-[#5c6974] font-[Roboto] tracking-[1.73px] h-full ${
-                        !userData.image && "absolute top-[43%] translate-y-0"
+                        !userData.img_path && "absolute top-[43%] translate-y-0"
                       }`}
                     >
-                      {userData.image ? (
+                      {userData.img_path ? (
                         <img
-                          src={userData.image}
+                          src={userData.img_path}
                           alt="user"
                           className="w-full h-full object-contain"
                         />
@@ -362,7 +413,8 @@ const AddNewForm = ({ closeModal, userDataToEdit }) => {
                   changeHandler={setUserData}
                   options={optionsDATA.offices}
                   isError={errors.office}
-                  value={userData.office}
+                  value={userData.office.id}
+                  label={getLabel(userData.office, optionsDATA.offices)?.name}
                   isLoading={loading}
                 />
                 {errors.office && <ErrorSpan text={errors.office} />}
@@ -384,6 +436,9 @@ const AddNewForm = ({ closeModal, userDataToEdit }) => {
                   options={optionsDATA.departments}
                   isError={errors.department}
                   value={userData.department}
+                  label={
+                    getLabel(userData.department, optionsDATA.departments)?.name
+                  }
                 />
                 {errors.department && <ErrorSpan text={errors.department} />}
               </div>
@@ -393,17 +448,23 @@ const AddNewForm = ({ closeModal, userDataToEdit }) => {
                   className={`text-[13px] ${
                     errors.attendance ? "text-red-400" : "text-[#313030]"
                   }`}
-                  htmlFor="attendance_type"
+                  htmlFor="attendance_profile"
                 >
                   Attendance Profile
                 </label>
                 <SelectInput
-                  id="attendance_type"
+                  id="attendance_profile"
                   isLoading={loading}
                   changeHandler={setUserData}
                   options={optionsDATA.attendance_profiles}
                   isError={errors.attendance}
                   value={userData.attendance_profile}
+                  label={
+                    getLabel(
+                      userData.attendance_profile,
+                      optionsDATA.attendance_profiles
+                    )?.name
+                  }
                 />
                 {errors.attendance && <ErrorSpan text={errors.attendance} />}
               </div>
@@ -424,6 +485,7 @@ const AddNewForm = ({ closeModal, userDataToEdit }) => {
                   options={optionsDATA.roles}
                   isError={errors.role}
                   value={userData.role}
+                  label={getLabel(userData.role, optionsDATA.roles)?.name}
                 />
                 {errors.role && <ErrorSpan text={errors.role} />}
               </div>
@@ -444,6 +506,9 @@ const AddNewForm = ({ closeModal, userDataToEdit }) => {
                   options={optionsDATA.positions}
                   isError={errors.position}
                   value={userData.position}
+                  label={
+                    getLabel(userData.position, optionsDATA.positions)?.name
+                  }
                 />
                 {errors.position && <ErrorSpan text={errors.position} />}
               </div>
@@ -464,6 +529,9 @@ const AddNewForm = ({ closeModal, userDataToEdit }) => {
                   options={optionsDATA.employeesName}
                   isError={errors.manager}
                   value={userData.manager}
+                  label={
+                    getLabel(userData.manager, optionsDATA.employeesName)?.name
+                  }
                 />
                 {errors.manager && <ErrorSpan text={errors.manager} />}
               </div>
