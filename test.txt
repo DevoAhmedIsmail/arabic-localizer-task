@@ -1,52 +1,128 @@
-import "./App.css";
-import ListContainer from "./components/ListContainer";
-import Layout from "./pages/Layout";
-import { useQuery } from "@apollo/client";
-import { useContext, useEffect } from "react";
-import { EmployeeContext } from "./context/EmployeeProvider";
-import LoadingSpinner from "./components/LoadingSpinner";
-import { GET_COMPANY_USERS } from "./queries";
+********************************* update ********************************
 
+import { useMutation } from '@apollo/client';
+import { UPDATE_USER, GET_COMPANY_USERS } from 'your-graphql-queries'; // Replace with your actual GraphQL queries
 
-function App() {
-  const [pageNumber, setPageNumber] = useState(1)
-  const { loading, error, data } = useQuery(GET_COMPANY_USERS,{
-    variables: {first: 16, page: pageNumber,input: ""}
-  })
-  
-  const {setAllEmployees} = useContext(EmployeeContext);
- 
-  // Change page number
-  const pageHandler = (num)=>{
-    setPageNumber(num)
-  }
+const YourComponent = () => {
+  const [updateUserQL, { loading: updateLoading }] = useMutation(UPDATE_USER);
 
-  // Change page with arrow
-  const pageArrowHandler = (num)=>{
-    setPageNumber(pageNumber+num)
-  }
+  const handleUpdateUser = async () => {
+    try {
+      const { data } = await updateUserQL({
+        variables: {
+          ext: {
+            id: userDataToEdit?.id,
+            name: userData.name,
+            starts_at: userData.starts_at,
+            email: userData.email,
+            phone: userData.phone,
+            department_id: userData.department,
+            manager_id: userData.manager,
+            company_id: userData.office,
+            office_id: userData.office,
+            has_credentials: 0,
+            position_id: userData.position,
+            att_profile_id: userData.attendance_profile,
+            can_work_home: userData.can_work_home,
+            max_homeDays_per_week: 0,
+            flexible_home: 0,
+            can_ex_days: 0,
+            copied_managers: userData.manager,
+          },
+        },
+        update: (cache, { data }) => {
+          // Update the cache manually with the updated data
+          cache.writeQuery({
+            query: GET_COMPANY_USERS,
+            variables: {
+              first: numOfCard,
+              page: pageNumber,
+              input: searchText,
+            },
+            data: {
+              // Update the relevant data in the cache using the updated response
+              getCompanyUsers: data.updatedUser, // Replace `getCompanyUsers` with the actual query result field name
+            },
+          });
+        },
+      });
 
-  // Search
-  const searchHandler = (text)=>{
-    setPageNumber(1)
-  }
-  
-  useEffect(()=>{
-    // console.log("Pagination",data.company_users.paginatorInfo);
-    data && setAllEmployees(data.company_users.data)
-  },[data])
+      handelLoading(false);
+    } catch (error) {
+      let { graphQLErrors } = error;
+      console.log(error);
+    }
+  };
 
-  if (error) return <p>Error: {error.message}</p>;
-  // console.log(data.company_users.data);
-
+  // Rest of your component code...
 
   return (
-    <div className="App">
-      <Layout>
-        <ListContainer loadingContent={loading} paginationInfo={data?.company_users.paginatorInfo} pageHandler={pageHandler} pageArrowHandler={pageArrowHandler} searchHandler={searchHandler} />
-      </Layout>
-    </div>
+    // JSX code for your component...
   );
-}
+};
 
-export default App;
+export default YourComponent;
+
+************************* Add new *****************************
+
+import { useMutation } from '@apollo/client';
+import { CREATE_USER, GET_COMPANY_USERS } from 'your-graphql-queries'; // Replace with your actual GraphQL queries
+
+const YourComponent = () => {
+  const [createUserQL, { loading: createLoading }] = useMutation(CREATE_USER);
+
+  const handleCreateUser = async () => {
+    try {
+      const { data } = await createUserQL({
+        variables: {
+          ext: {
+            // Add all the necessary variables for creating a new user
+          },
+        },
+        update: (cache, { data }) => {
+          // Retrieve the existing data from the cache
+          const existingData = cache.readQuery({
+            query: GET_COMPANY_USERS,
+            variables: {
+              first: numOfCard,
+              page: pageNumber,
+              input: searchText,
+            },
+          });
+
+          // Add the new user data to the existing data array
+          const updatedData = {
+            getCompanyUsers: [
+              ...existingData.getCompanyUsers,
+              data.createdUser, // Replace `createdUser` with the actual response field containing the newly created user data
+            ],
+          };
+
+          // Update the cache with the updated data
+          cache.writeQuery({
+            query: GET_COMPANY_USERS,
+            variables: {
+              first: numOfCard,
+              page: pageNumber,
+              input: searchText,
+            },
+            data: updatedData,
+          });
+        },
+      });
+
+      handelLoading(false);
+    } catch (error) {
+      let { graphQLErrors } = error;
+      console.log(error);
+    }
+  };
+
+  // Rest of your component code...
+
+  return (
+    // JSX code for your component...
+  );
+};
+
+export default YourComponent;
