@@ -42,7 +42,7 @@ function App() {
 
   useEffect(() => {
     // data && setAllEmployees(data.company_users.data);
-    console.log(data);
+    // console.log(data);
   }, [data]);
 
   if (error) return <p>Error: {error.message}</p>;

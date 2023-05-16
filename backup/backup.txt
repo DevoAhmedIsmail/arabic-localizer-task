@@ -2,16 +2,10 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import ModalTitle from "./ModalTitle";
 import Button from "./Button";
 import { EmployeeContext } from "../context/EmployeeProvider";
-import { SelectInput, SelectMultiInput } from "./Inputs";
+import { SelectInput } from "./Inputs";
 import ErrorSpan from "./ErrorSpan";
 import { MdClose } from "react-icons/md";
-import Swal from "sweetalert2";
-import {
-  ADD_USER,
-  GET_ALL_OPTIONS,
-  GET_COMPANY_USERS,
-  UPDATE_USER,
-} from "../graphql";
+import { GET_ALL_OPTIONS, GET_COMPANY_USERS, UPDATE_USER } from "../graphql";
 import { useApolloClient, useMutation, useQuery } from "@apollo/client";
 import LoadingSpinner from "./LoadingSpinner";
 
@@ -21,7 +15,7 @@ const AddNewForm = ({
   pageNumber,
   numOfCard,
   searchText,
-  handelLoading,
+  handelLoading
 }) => {
   const [userData, setUserData] = useState({
     name: "",
@@ -32,11 +26,10 @@ const AddNewForm = ({
     attendance_profile: 0,
     department: 0,
     manager: 0,
-    copied_managers: [],
     office: 0,
     position: 0,
     role: 0,
-    can_work_home: 0,
+    can_work_home: false,
   });
 
   const [optionsDATA, setOptionsDATA] = useState({
@@ -47,9 +40,9 @@ const AddNewForm = ({
     employeesName: [],
     roles: [],
   });
+
   const [isSaveForm, setIsSaveForm] = useState(false);
   const [errors, setErrors] = useState({});
-  const client = useApolloClient();
 
   // to store image which come form user
   const [selectedImage, setSelectedImage] = useState(null);
@@ -119,142 +112,61 @@ const AddNewForm = ({
 
   // Push Values to api
   const [updateUserQL, { loading: updateLoading }] = useMutation(UPDATE_USER);
-  const [addUserQL, { loading: createUserLoading }] = useMutation(ADD_USER);
-
 
   // Submit Form
-  const handleSubmitUpdate = async (e) => {
+  function handleSubmit(e) {
     e.preventDefault();
     if (validateForm()) {
-      handelLoading(true);
+      handelLoading(true)
       // console.log('Form submitted:', { name, email, phone });
       // Do something with the form data
-      // console.log(userData);
-      try {
-        // Update
-        if (userDataToEdit.id !== undefined) {
-          const { data } = await updateUserQL({
+      console.log(userData);
+      updateUserQL({
+        variables: {
+          ext: {
+            id: userDataToEdit?.id,
+            name: userData.name,
+            starts_at: userData.starts_at,
+            email: userData.email,
+            phone: userData.phone,
+            department_id: userData.department,
+            manager_id: userData.manager,
+            company_id: userData.office,
+            office_id: userData.office,
+            has_credentials: 0,
+            position_id: userData.position,
+            att_profile_id: userData.attendance_profile,
+            can_work_home: userData.can_work_home,
+            max_homeDays_per_week: 0,
+            flexible_home: 0,
+            can_ex_days: 0,
+            copied_managers: userData.manager,
+          },
+        },
+        refetchQueries: [
+          {
+            query: GET_COMPANY_USERS,
             variables: {
-              ext: {
-                id: userDataToEdit?.id,
-                name: userData.name,
-                starts_at: userData.starts_at,
-                email: userData.email,
-                phone: userData.phone,
-                department_id: userData.department,
-                manager_id: userData.manager,
-                company_id: userData.office,
-                office_id: userData.office,
-                has_credentials: 0,
-                position_id: userData.position,
-                att_profile_id: userData.attendance_profile,
-                can_work_home: userData.can_work_home,
-                max_homeDays_per_week: 0,
-                flexible_home: 0,
-                can_ex_days: 0,
-                copied_managers: userData.copied_managers.map(manag=> manag.id),
-              },
+              first: numOfCard,
+              page: pageNumber,
+              input: searchText,
             },
-            update: (cache, { data }) => {
-              // Update the cache manually with the updated data
-              // console.log('Cache',data.update_user);
-
-              // const test = cache.readQuery({
-              //   query: GET_COMPANY_USERS,
-              //   variables: {
-              //     first: numOfCard,
-              //     page: pageNumber,
-              //     input: searchText,
-              //   },
-              // })
-              // console.log('info', test);
-
-              cache.writeQuery({
-                query: GET_COMPANY_USERS,
-                variables: {
-                  first: numOfCard,
-                  page: pageNumber,
-                  input: searchText,
-                },
-                data: {
-                  company_users: {
-                    data: data.update_user,
-                  },
-                },
-              });
-            },
-             onCompleted: data=>{
-              Swal.fire("User Updated!","","success");
-              closeModal();
-            }
-          });
-        } else {
-          // Add new User
-
-          const { data } = await addUserQL({
-            variables: {
-              userInput: {
-                name: userData.name,
-                starts_at: userData.starts_at,
-                email: userData.email,
-                phone: userData.phone,
-                department_id: userData.department,
-                manager_id: userData.manager,
-                company_id: userData.office,
-                office_id: userData.office,
-                position_id: userData.position,
-                att_profile_id: userData.attendance_profile,
-                can_work_home: userData.can_work_home,
-                role_id: "6",
-                copied_managers: userData.copied_managers,
-                has_credentials: 1,
-                max_homeDays_per_week: 0,
-                flexible_home: 0,
-                can_ex_days: 0,
-              },
-              userSalaryInput: {
-                salary_config: {
-                  start_at: userData.starts_at,
-                },
-              },
-            },
-            // onError({networkError,graphQLErrors}) {
-            //   if (graphQLErrors) {
-            //             graphQLErrors.map(({ extensions }) =>Swal.fire("Error!", extensions.reason, "error"));
-            //         }
-            //         if (networkError) {
-            //             console.log(" [Network error]:", networkError)
-            //         };
-            // },
-            refetchQueries: [
-              {
-                query: GET_COMPANY_USERS,
-                variables: {
-                  first: numOfCard,
-                  page: pageNumber,
-                  input: searchText||"",
-                },
-              },
-            ],
-            onCompleted: data=>{
-              Swal.fire("User Added!","","success");
-              closeModal();
-            }
-            
-          });
-        }
-
-        handelLoading(false);
-      } catch (error) {
+          },
+        ],
+      }).then(()=>{
+        handelLoading(false)
+      }).catch((error) => {
         let { graphQLErrors } = error;
+        // if (graphQLErrors[0].extensions.category === "validation") {
+        //   console.log(graphQLErrors[0].extensions.validation);
+        // }
         console.log(error);
-        Swal.fire("Error!", error.message, "error");
-      }
+      });
 
-      
+      closeModal();
       // setIsSaveForm(false);
     }
-  };
+  }
 
   // get Label
   const getLabel = (id, arr) => {
@@ -273,7 +185,6 @@ const AddNewForm = ({
         attendance_profile: userDataToEdit.attendance_profile?.id,
         department: userDataToEdit.department?.id,
         manager: userDataToEdit.manager?.id,
-        copied_managers: userDataToEdit.copied_managers,
         office: userDataToEdit.office?.id,
         position: userDataToEdit.position?.id,
         can_work_home: userDataToEdit.can_work_home,
@@ -285,14 +196,13 @@ const AddNewForm = ({
         starts_at: "",
         phone: "",
         email: "",
-        attendance_profile: [],
-        department: 0,
-        manager: 0,
-        copied_managers: [],
-        office: 0,
-        position: 0,
-        role: 0,
-        can_work_home: 0,
+        attendance_profile: "",
+        department: "",
+        manager: "",
+        office: "",
+        position: "",
+        role: "",
+        can_work_home: false,
       });
     }
 
@@ -344,16 +254,6 @@ const AddNewForm = ({
       className="fixed top-0 left-0 w-full min-h-screen z-30 flex justify-center items-center"
       style={{ backgroundColor: "rgba(40, 104, 174, 0.43)" }}
     >
-      {createUserLoading && (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[10]">
-          <LoadingSpinner />
-        </div>
-      )}
-      {updateLoading  && (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[10]">
-          <LoadingSpinner />
-        </div>
-      )}
       <div
         className="bg-white pt-[11px] pb-[0px] p-5 max-h-[100vh] min-h-[710px] md:min-h-[717px] w-[90%] md:w-[700px] lg:w-[1000px] overflow-auto rounded-[4px]"
         ref={wrapperRef}
@@ -365,7 +265,7 @@ const AddNewForm = ({
         </div>
 
         <div className="">
-          <form onSubmit={(e) => handleSubmitUpdate(e)}>
+          <form onSubmit={(e) => handleSubmit(e)}>
             <ModalTitle text="Personal Info" />
             <div className="grid grid-cols-12 mt-[20px]">
               <div className="col-start-1 col-end-13 md:col-end-4 relative mb-4">
@@ -635,32 +535,6 @@ const AddNewForm = ({
                 />
                 {errors.manager && <ErrorSpan text={errors.manager} />}
               </div>
-
-              <div className="w-1/2 flex flex-col pl-[32px] relative">
-                <label
-                  className={`text-[13px] ${
-                    errors.manager ? "text-red-400" : "texwt-[#313030]"
-                  }`}
-                  htmlFor="copied_managers"
-                >
-                  Copied Manager
-                </label>
-                <SelectMultiInput
-                  id="copied_managers"
-                  isLoading={loading}
-                  changeHandler={setUserData}
-                  options={optionsDATA.employeesName.filter(
-                    (optdata) => optdata.id !== userData.manager
-                  )}
-                  isError={errors.manager}
-                  value={userData.copied_managers}
-                  isMulti={true}
-                  label={
-                    getLabel(userData.manager, optionsDATA.employeesName)?.name
-                  }
-                />
-                {errors.manager && <ErrorSpan text={errors.manager} />}
-              </div>
             </div>
             {/* End Inputs */}
 
@@ -674,7 +548,7 @@ const AddNewForm = ({
                 onChange={(e) =>
                   setUserData((prev) => ({
                     ...prev,
-                    can_work_home: prev.can_work_home ? 0 : 1,
+                    can_work_home: !prev.can_work_home,
                   }))
                 }
               />
@@ -701,11 +575,7 @@ const AddNewForm = ({
                 text={`${userDataToEdit.id == undefined ? "Save" : "Update"}`}
                 color="#23aaeb"
                 fontSize="13px"
-                onSubmit={
-                  userDataToEdit.id == undefined
-                    ? handleSubmitUpdate
-                    : handleSubmitUpdate
-                }
+                onSubmit={handleSubmit}
               />
             </div>
           </form>
@@ -716,3 +586,8 @@ const AddNewForm = ({
 };
 
 export default AddNewForm;
+
+
+
+
+

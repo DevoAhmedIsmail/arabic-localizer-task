@@ -66,76 +66,78 @@ const CardItem = ({
               },
             })
             .then((res) => {
-              if (res.value === "123456") {
-                deleteUserQL({
-                  variables: { id: data.id, password: res.value },
-                  refetchQueries: [
-                    {
-                      query: GET_COMPANY_USERS,
-                      variables: {
-                        first: numOfCard,
-                        page: pageNumber,
-                        input: searchText,
-                      },
+              // if (res.value === "123456") {
+              deleteUserQL({
+                variables: { id: data.id, password: res.value },
+                refetchQueries: [
+                  {
+                    query: GET_COMPANY_USERS,
+                    variables: {
+                      first: numOfCard,
+                      page: pageNumber,
+                      input: searchText,
                     },
-                  ],
-                  // TODO: not working
-                  update(cache, { data }) {
-                    // const {company_users} = cache.readQuery({query: GET_COMPANY_USERS});
-                    // cache.writeQuery({
-                    //   query: GET_COMPANY_USERS,
-                    //   data: {
-                    //     company_users: {
-                    //       data: company_users.data.filter(user=> user.id !== id)
-                    //     }
-                    //   }
-                    // })
-                    // cache.modify({
-                    //   fields: {
-                    //     company_users(existingUsers,{readField}) {
-                    //       console.log(existingUsers);
-                    //       return existingUsers.data.filter(userRef=> data.id !==readField('id', userRef))
-                    //     }
-                    //   }
-                    // })
-                    // cache.modify({
-                    //   id: cache.identify(data),
-                    //   fields: {
-                    //     company_users(existingUsers, {DELETE}){
-                    //       return DELETE
-                    //     }
-                    //   }
-                    // })
                   },
+                ],
+
+              onError({networkError,graphQLErrors}) {
+                if (graphQLErrors) {
+                          graphQLErrors.map(({ extensions }) =>swalWithClasses.fire("Error!", extensions.reason, "error"));
+                      }
+                      if (networkError) {
+                          console.log(" [Network error]:", networkError)
+                      };
+              },
+          
+                // TODO: not working
+                update(cache, { data }) {
+                  // const {company_users} = cache.readQuery({query: GET_COMPANY_USERS});
+                  // cache.writeQuery({
+                  //   query: GET_COMPANY_USERS,
+                  //   data: {
+                  //     company_users: {
+                  //       data: company_users.data.filter(user=> user.id !== id)
+                  //     }
+                  //   }
+                  // })
+                  // cache.modify({
+                  //   fields: {
+                  //     company_users(existingUsers,{readField}) {
+                  //       console.log(existingUsers);
+                  //       return existingUsers.data.filter(userRef=> data.id !==readField('id', userRef))
+                  //     }
+                  //   }
+                  // })
+                  // cache.modify({
+                  //   id: cache.identify(data),
+                  //   fields: {
+                  //     company_users(existingUsers, {DELETE}){
+                  //       return DELETE
+                  //     }
+                  //   }
+                  // })
+                },
+              })
+                .then((res) => {
+                  console.log(res);
+                  if (res.data.delete_user.status === "success") {
+                    Swal.fire({
+                      timer: 2000,
+                      title: "The User is deleted",
+                      icon: "success",
+                    });
+                  } else {
+                    swalWithClasses.fire(
+                      "Error!",
+                      res.data.delete_user.message,
+                      "Error"
+                    );
+                  }
                 })
-                  .then((res) => {
-                    console.log(res);
-                    if (res.data.delete_user.status === "success") {
-                      Swal.fire({
-                        timer: 2000,
-                        title: "The User is deleted",
-                        icon: "success",
-                      });
-                    } else {
-                      swalWithClasses.fire(
-                        "Error!",
-                        res.data.delete_user.message,
-                        "Error"
-                      );
-                    }
-                  })
-                  .catch((error) => {
-                    console.log(error);
-                    swalWithClasses.fire("Error!", error.message, "Error");
-                  });
-              } else {
-                Swal.fire({
-                  timer: 2000,
-                  title: "Incorrect password",
-                  icon: "warning",
-                  showConfirmButton: false,
+                .catch((error) => {
+                  console.log(error.extensions);
+                  // swalWithClasses.fire("Error!", error.message, "error");
                 });
-              }
             });
         }
       });
@@ -146,6 +148,7 @@ const CardItem = ({
   };
   const wrapperRef = useRef(null);
   useEffect(() => {
+    // console.log(data);
     const handleClickOutside = (event) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
         setShowDetails(false);

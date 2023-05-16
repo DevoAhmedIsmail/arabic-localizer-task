@@ -60,7 +60,20 @@
 
 .react-select__value-container {
     margin-bottom: 0!important;
+    height: 29px;
 }
+
+.react-select__clear-indicator {
+    display: none!important;
+}
+
+.react-select__value-container--is-multi  {
+    overflow: auto!important;
+}
+
+.react-select__value-container--is-multi::-webkit-scrollbar {
+    display: none;
+  }
 
 .react-select__indicator {
     padding: 0 7px!important;
@@ -68,6 +81,12 @@
 
 .react-select__indicator-separator {
     margin-bottom: 7px!important;
+}
+
+.react-select__indicators {
+    position: absolute;
+    top: 5px;
+    right: -2px;
 }
 
 /* .react-select__menu {

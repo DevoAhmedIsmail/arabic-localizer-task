@@ -40,11 +40,11 @@ const ListContainer = ({loadingContent,paginationInfo,pageHandler,pageArrowHandl
   }, [showModal]);
   return (
     <div className="pl-[35px] pr-[18px] pt-2 min-h-full ">
-      {loadingUpdate && (
+      {/* {loadingUpdate && (
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
           <LoadingSpinner />
         </div>
-      )}
+      )} */}
       <div className="bg-[#f7f8f9] px-3 py-5">
         <div className="flex flex-col md:flex-row items-center gap-3">
           <SearchForm setShowModal={setShowModal} searchText={searchText} searchHandler={searchHandler} />

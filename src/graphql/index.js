@@ -231,6 +231,49 @@ export const UPDATE_USER = gql`
 }
 `;
 
+export const ADD_USER = gql`
+  mutation add_user($userInput: UserInput!, $userSalaryInput: UserSalaryConfigInput!) {
+  store_user_with_user_salary_config(
+    input: {
+      user_input: $userInput
+      user_salary_config_input: $userSalaryInput
+    }
+  ) {
+        id
+        name
+        img_path
+        starts_at
+        phone
+        email
+        attendance_profile {
+          name
+          id
+        }
+        can_work_home
+        department {
+          name
+          id
+        }
+        manager {
+          name
+          id
+        }
+        copied_managers {
+          name
+          id
+        }
+        office {
+          name
+          id
+        }
+        position {
+          name
+          id
+        }
+  }
+}
+`;
+
 /* 
 
     TODO GET USER ✔️
@@ -241,6 +284,6 @@ export const UPDATE_USER = gql`
     TODO GET office ✔️
     TODO GET direct manager from users name ✔️
     TODO DELETE USER ✔️
-    TODO UPDATE USER 🚀
-    TODO Add USER 
+    TODO UPDATE USER ✔️
+    TODO Add USER 🚀
  */
