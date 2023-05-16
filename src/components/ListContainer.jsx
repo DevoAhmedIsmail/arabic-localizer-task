@@ -23,6 +23,7 @@ const ListContainer = ({loadingContent,paginationInfo,pageHandler,pageArrowHandl
   };
 
   const showModalHandler = (data)=>{
+    console.log("DATA: ", data);
     setShowModal(true);
     setUserDataToEdit(data)
     // console.log(data);

@@ -141,32 +141,32 @@ export const GET_ALL_OPTIONS = gql`
   query get_All_options($first: Int!) {
     company_users {
       data {
-        id
-        name
+        value:id
+        label:name
       }
     }
     company_departments(first: $first) {
       data {
-        name
-        id
+        label:name
+        value:id
       }
     }
     positions(first: $first) {
       data {
-        name
-        id
+        label:name
+        value:id
       }
     }
     attendance_profiles(first: $first) {
       data {
-        name
-        id
+        label:name
+        value:id
       }
     }
     offices(first: $first) {
       data {
-        name
-        id
+        label:name
+        value:id
       }
     }
     profile {
@@ -174,8 +174,8 @@ export const GET_ALL_OPTIONS = gql`
         currentSubscription {
           plan {
             roles {
-              name
-              id
+              label:name
+              value:id
             }
           }
         }

@@ -9,8 +9,8 @@ import { MdCallEnd } from "react-icons/md";
 import AttendLabel from "./AttendLabel";
 import { EmployeeContext } from "../../context/EmployeeProvider";
 import Swal from "sweetalert2";
-import { useMutation, useApolloClient } from "@apollo/client";
-import { DELETE_USER, GET_COMPANY_USERS } from "../../graphql";
+import { useMutation, useApolloClient, useQuery, useLazyQuery } from "@apollo/client";
+import { DELETE_USER, GET_COMPANY_USERS, GET_USER_BY_ID } from "../../graphql";
 import LoadingSpinner from "../LoadingSpinner";
 
 const CardItem = ({
@@ -143,8 +143,11 @@ const CardItem = ({
       });
   };
 
-  const UpdateUserHandler = (id) => {
-    showModalHandler(data);
+  const [get_user_id,{loading: loadingUser}] = useLazyQuery(GET_USER_BY_ID)
+
+  const UpdateUserHandler = async(id) => {
+    const user = await get_user_id({variables:{id}})
+    showModalHandler(user.data.user);
   };
   const wrapperRef = useRef(null);
   useEffect(() => {
@@ -176,6 +179,11 @@ const CardItem = ({
           <LoadingSpinner />
         </div>
       )}
+      {loadingUser && (
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[10]">
+          <LoadingSpinner />
+        </div>
+      )}
       <div className="grid grid-cols-12">
         <div className="col-start-1 col-end-13 md:col-end-4">
           <div>
@@ -191,7 +199,7 @@ const CardItem = ({
             <div className="flex justify-center gap-10 md:gap-0 md:justify-between items-center text-[#8997a4] text-[14px] mt-[15px] md:mt-[17px] mb-5 md:mb-0">
               <HiPencil
                 className="hover:text-cyan-400 cursor-pointer"
-                onClick={() => UpdateUserHandler(data.is)}
+                onClick={() => UpdateUserHandler(data.id)}
               />
               <AiOutlinePauseCircle className="" />
               <RiDeleteBin2Fill
@@ -317,9 +325,9 @@ const CardItem = ({
                           </p>
                           <p
                             className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px] text-overflow"
-                            title={data.copied_managers?.name}
+                            title={data.copied_managers[0]?.name}
                           >
-                            {data.manager?.name}
+                            {data.copied_managers[0]?.name}
                           </p>
                         </div>
                         <div className="flex flex-col">

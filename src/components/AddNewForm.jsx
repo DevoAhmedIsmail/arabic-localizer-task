@@ -15,6 +15,22 @@ import {
 import { useApolloClient, useMutation, useQuery } from "@apollo/client";
 import LoadingSpinner from "./LoadingSpinner";
 
+const initState = {
+  name: "",
+  img_path: "",
+  starts_at: "",
+  phone: "",
+  email: "",
+  attendance_profile: 0,
+  department: 0,
+  manager: 0,
+  copied_managers: [],
+  office: 0,
+  position: 0,
+  role: 0,
+  can_work_home: 0,
+};
+
 const AddNewForm = ({
   closeModal,
   userDataToEdit,
@@ -121,18 +137,18 @@ const AddNewForm = ({
   const [updateUserQL, { loading: updateLoading }] = useMutation(UPDATE_USER);
   const [addUserQL, { loading: createUserLoading }] = useMutation(ADD_USER);
 
-
   // Submit Form
   const handleSubmitUpdate = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
+    if (true) {
       handelLoading(true);
       // console.log('Form submitted:', { name, email, phone });
       // Do something with the form data
       // console.log(userData);
       try {
-        // Update
+        // Update method
         if (userDataToEdit.id !== undefined) {
+          console.log(userData);
           const { data } = await updateUserQL({
             variables: {
               ext: {
@@ -142,6 +158,7 @@ const AddNewForm = ({
                 email: userData.email,
                 phone: userData.phone,
                 department_id: userData.department,
+                // user_image:userData.img_path,
                 manager_id: userData.manager,
                 company_id: userData.office,
                 office_id: userData.office,
@@ -152,7 +169,9 @@ const AddNewForm = ({
                 max_homeDays_per_week: 0,
                 flexible_home: 0,
                 can_ex_days: 0,
-                copied_managers: userData.copied_managers.map(manag=> manag.id),
+                copied_managers: userData.copied_managers.map(
+                  (manag) => manag.id
+                ),
               },
             },
             update: (cache, { data }) => {
@@ -180,13 +199,18 @@ const AddNewForm = ({
                   company_users: {
                     data: data.update_user,
                   },
+                  // paginatorInfo: {
+                  //   first: numOfCard,
+                  //   page: pageNumber,
+                  //   input: searchText,
+                  // }
                 },
               });
             },
-             onCompleted: data=>{
-              Swal.fire("User Updated!","","success");
+            onCompleted: (data) => {
+              Swal.fire("User Updated!", "", "success");
               closeModal();
-            }
+            },
           });
         } else {
           // Add new User
@@ -206,7 +230,9 @@ const AddNewForm = ({
                 att_profile_id: userData.attendance_profile,
                 can_work_home: userData.can_work_home,
                 role_id: "6",
-                copied_managers: userData.copied_managers,
+                copied_managers: userData.copied_managers.map(
+                  (manag) => manag.id
+                ),
                 has_credentials: 1,
                 max_homeDays_per_week: 0,
                 flexible_home: 0,
@@ -226,21 +252,42 @@ const AddNewForm = ({
             //             console.log(" [Network error]:", networkError)
             //         };
             // },
+            onError({ networkError, graphQLErrors }) {
+              if (graphQLErrors) {
+                let errors = {};
+
+                const extensionsValiName = graphQLErrors[0].extensions.validation["input.user_input.name"]
+                const extensionsValiEmail = graphQLErrors[0].extensions.validation["input.user_input.email"]
+                const extensionsValiPhone = graphQLErrors[0].extensions.validation["input.user_input.phone"]
+                const extensionsValiDate = graphQLErrors[0].extensions.validation["input.user_salary_config_input.salary_config.start_at"]
+                
+                errors.name = extensionsValiName ? extensionsValiName[0] : "" 
+                errors.email = extensionsValiEmail ? extensionsValiEmail[0] : ""
+                errors.phone = extensionsValiPhone ? extensionsValiPhone[0] : "" 
+                errors.startDate = extensionsValiDate ? extensionsValiDate[0] : "" 
+                setErrors(errors)
+
+                // console.log(graphQLErrors[0].extensions.validation["input.user_input.email"][0]);
+
+              }
+              if (networkError) {
+                console.log(" [Network error]:", networkError);
+              }
+            },
             refetchQueries: [
               {
                 query: GET_COMPANY_USERS,
                 variables: {
                   first: numOfCard,
                   page: pageNumber,
-                  input: searchText||"",
+                  input: searchText || "",
                 },
               },
             ],
-            onCompleted: data=>{
-              Swal.fire("User Added!","","success");
+            onCompleted: (data) => {
+              Swal.fire("User Added!", "", "success");
               closeModal();
-            }
-            
+            },
           });
         }
 
@@ -248,10 +295,9 @@ const AddNewForm = ({
       } catch (error) {
         let { graphQLErrors } = error;
         console.log(error);
-        Swal.fire("Error!", error.message, "error");
+        // Swal.fire("Error!", error.message, "error");
       }
 
-      
       // setIsSaveForm(false);
     }
   };
@@ -259,6 +305,25 @@ const AddNewForm = ({
   // get Label
   const getLabel = (id, arr) => {
     return arr.find((ele) => ele.id == id);
+  };
+
+  //
+  const managerOptions = () => {
+    // const res = optionsDATA.employeesName.filter(userInfo=>{
+    //   if(userData.copied_managers.length > 0){
+    //     return userData.copied_managers.some(copied=> copied.id !== userInfo.id)
+    //   }else {
+    //     return optionsDATA.employeesName
+    //   }
+    // })
+
+    const res = optionsDATA.employeesName.filter((userInfo) => {
+      return !userData.copied_managers.some(
+        (copied) => copied.id === userInfo.value
+      );
+    });
+    return res;
+    // console.log("userData.copied_managers ",userData.copied_managers.some(copied=> copied.id == '10'));
   };
 
   const wrapperRef = useRef(null);
@@ -279,26 +344,12 @@ const AddNewForm = ({
         can_work_home: userDataToEdit.can_work_home,
       });
     } else {
-      setUserData({
-        name: "",
-        img_path: "",
-        starts_at: "",
-        phone: "",
-        email: "",
-        attendance_profile: [],
-        department: 0,
-        manager: 0,
-        copied_managers: [],
-        office: 0,
-        position: 0,
-        role: 0,
-        can_work_home: 0,
-      });
+      setUserData(initState);
     }
 
     const handleClickOutside = (event) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-        closeModal();
+        // closeModal();
       }
     };
 
@@ -349,7 +400,7 @@ const AddNewForm = ({
           <LoadingSpinner />
         </div>
       )}
-      {updateLoading  && (
+      {updateLoading && (
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[10]">
           <LoadingSpinner />
         </div>
@@ -513,8 +564,7 @@ const AddNewForm = ({
                   changeHandler={setUserData}
                   options={optionsDATA.offices}
                   isError={errors.office}
-                  value={userData.office.id}
-                  label={getLabel(userData.office, optionsDATA.offices)?.name}
+                  value={userData.office}
                   isLoading={loading}
                 />
                 {errors.office && <ErrorSpan text={errors.office} />}
@@ -536,9 +586,6 @@ const AddNewForm = ({
                   options={optionsDATA.departments}
                   isError={errors.department}
                   value={userData.department}
-                  label={
-                    getLabel(userData.department, optionsDATA.departments)?.name
-                  }
                 />
                 {errors.department && <ErrorSpan text={errors.department} />}
               </div>
@@ -559,15 +606,13 @@ const AddNewForm = ({
                   options={optionsDATA.attendance_profiles}
                   isError={errors.attendance}
                   value={userData.attendance_profile}
-                  label={
-                    getLabel(
-                      userData.attendance_profile,
-                      optionsDATA.attendance_profiles
-                    )?.name
-                  }
                 />
                 {errors.attendance && <ErrorSpan text={errors.attendance} />}
               </div>
+
+              {/* {
+                userDataToEdit.id == undefined && ()
+              } */}
 
               <div className="w-1/2 flex flex-col  mb-4 relative">
                 <label
@@ -626,7 +671,7 @@ const AddNewForm = ({
                   id="manager"
                   isLoading={loading}
                   changeHandler={setUserData}
-                  options={optionsDATA.employeesName}
+                  options={managerOptions()}
                   isError={errors.manager}
                   value={userData.manager}
                   label={
@@ -650,14 +695,14 @@ const AddNewForm = ({
                   isLoading={loading}
                   changeHandler={setUserData}
                   options={optionsDATA.employeesName.filter(
-                    (optdata) => optdata.id !== userData.manager
+                    (optdata) => optdata.value !== userData.manager.value
                   )}
                   isError={errors.manager}
                   value={userData.copied_managers}
                   isMulti={true}
-                  label={
-                    getLabel(userData.manager, optionsDATA.employeesName)?.name
-                  }
+                  // label={
+                  //   getLabel(userData.copied_managers, optionsDATA.employeesName)?.name
+                  // }
                 />
                 {errors.manager && <ErrorSpan text={errors.manager} />}
               </div>
@@ -692,8 +737,11 @@ const AddNewForm = ({
 
             <div className="flex justify-end gap-3 mt-[15px]">
               <button
-                className={` text-white w-[94px] h-[27px] rounded-[5px] font-[Roboto] bg-[#ff6a6a] text-[13px] `}
+                className={` text-white w-[94px] h-[27px] rounded-[5px] font-[Roboto] bg-[#ff6a6a] text-[13px] ${
+                  createUserLoading && "opacity-50"
+                } ${updateLoading && "opacity-50"}`}
                 onClick={closeModal}
+                disabled={createUserLoading || updateLoading}
               >
                 Cancel
               </button>
@@ -706,6 +754,7 @@ const AddNewForm = ({
                     ? handleSubmitUpdate
                     : handleSubmitUpdate
                 }
+                disable={createUserLoading || updateLoading}
               />
             </div>
           </form>

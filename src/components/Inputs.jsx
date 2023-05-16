@@ -12,19 +12,23 @@ export const SelectInput = ({
   label,
   isLoading,
 }) => {
+  // console.log(id," => ",options);
   return (
     <Select
-      value={{ value: value || "Select", label: label || "Select" }}
+      // value={{ id: value || "Select", name: label || "Select" }}
+      value={options.find((e) => e.value == value)}
       classNamePrefix="react-select"
-      onChange={(e) => changeHandler((prev) => ({ ...prev, [id]: e.value }))}
+      onChange={(e, action) => {
+        console.log(e, action);
+        changeHandler((prev) => ({ ...prev, [id]: e.value }));
+      }}
       isLoading={isLoading}
       // isClearable={isClearable}
-      isSearchable={false}
+      isSearchable={true}
       name=""
-      options={options.map((option) => ({
-        value: option.id,
-        label: option.name,
-      }))}
+      options={options}
+      // getOptionLabel={(opt) => opt.name}
+      // getOptionValue={(opt) => opt.id}
       //  value={value}
       className={`  ${
         isError ? "border-red-400" : "border-[#aaaaaad6]"
@@ -40,32 +44,40 @@ export const SelectMultiInput = ({
   options,
   isError,
   value,
-  label,
   isLoading,
 }) => {
-
+  const defaultValue = value.map((val) => ({ value: val.id, label: val.name }));
   // console.log('MultiL ', value);
+  // console.log('defaultValue ', defaultValue);
+  // console.log(id," => ",options);
+
   return (
     <Select
       // value={{ value: value || "Select", label: label || "Select" }}
-      defaultValue={value}
+      value={defaultValue}
       classNamePrefix="react-select"
+      isSearchable={true}
       // changeHandler((prev) => ({ ...prev, [id]: e.value }))
       onChange={(e) => {
-        const arrValues =  e.map(ele=> ele.value)
-        changeHandler((prev) => ({ ...prev, copied_managers: arrValues }))
+        // console.log("e ",e);
+        const arrValues = e.map((ele) => ele.value);
+        // console.log("arrValues ",arrValues);
+        const copiedArr = e.map((ele) => {
+          return {
+            id: ele.value,
+            name: ele.label,
+          };
+        });
+        // console.log("copiedArr ", copiedArr);
+        changeHandler((prev) => ({ ...prev, copied_managers: copiedArr }));
       }}
       isMulti
       closeMenuOnSelect={false}
       components={animatedComponents}
       isLoading={isLoading}
       isClearable={true}
-      isSearchable={false}
       name=""
-      options={options.map((option) => ({
-        value: option.id,
-        label: option.name,
-      }))}
+      options={options}
       //  value={value}
       className={`  ${
         isError ? "border-red-400" : "border-[#aaaaaad6]"
