@@ -10,26 +10,13 @@ import {
   ADD_USER,
   GET_ALL_OPTIONS,
   GET_COMPANY_USERS,
+  GET_USER_BY_ID,
   UPDATE_USER,
 } from "../graphql";
-import { useApolloClient, useMutation, useQuery } from "@apollo/client";
+import { useApolloClient, useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import LoadingSpinner from "./LoadingSpinner";
 
-const initState = {
-  name: "",
-  img_path: "",
-  starts_at: "",
-  phone: "",
-  email: "",
-  attendance_profile: 0,
-  department: 0,
-  manager: 0,
-  copied_managers: [],
-  office: 0,
-  position: 0,
-  role: 0,
-  can_work_home: 0,
-};
+
 
 const AddNewForm = ({
   closeModal,
@@ -39,7 +26,8 @@ const AddNewForm = ({
   searchText,
   handelLoading,
 }) => {
-  const [userData, setUserData] = useState({
+
+  const initState = {
     name: "",
     img_path: "",
     starts_at: "",
@@ -53,8 +41,10 @@ const AddNewForm = ({
     position: 0,
     role: 0,
     can_work_home: 0,
-  });
+  };
 
+  const [userData, setUserData] = useState(initState);
+  // console.log(userData);
   const [optionsDATA, setOptionsDATA] = useState({
     departments: [],
     positions: [],
@@ -72,6 +62,29 @@ const AddNewForm = ({
 
   // Add Employee to context
   const { addEmployee } = useContext(EmployeeContext);
+
+  // variable to send to server
+  const variable = {
+    id: userDataToEdit?.id,
+    name: userData.name,
+    starts_at: userData.starts_at,
+    email: userData.email,
+    phone: userData.phone,
+    department_id: userData.department,
+    manager_id: userData.manager,
+    company_id: userData.office,
+    office_id: userData.office,
+    position_id: userData.position,
+    att_profile_id: userData.attendance_profile,
+    can_work_home: userData.can_work_home,
+    copied_managers: userData.copied_managers.map(
+      (manag) => manag.id
+    ),
+    has_credentials: 1,
+    max_homeDays_per_week: 0,
+    flexible_home: 0,
+    can_ex_days: 0,
+  }
 
   // Validations
   function validateForm() {
@@ -128,87 +141,85 @@ const AddNewForm = ({
   };
 
   // Fetch from graphql
-  const { loading, error, data, refetch } = useQuery(GET_ALL_OPTIONS, {
+  const { loading, error, data: dataOptions, refetch } = useQuery(GET_ALL_OPTIONS, {
     variables: { first: 100 },
-    // fetchPolicy: "cache-first"
   });
+
+
 
   // Push Values to api
   const [updateUserQL, { loading: updateLoading }] = useMutation(UPDATE_USER);
   const [addUserQL, { loading: createUserLoading }] = useMutation(ADD_USER);
 
+  // Validation on Error coming from server
+  const validationHandler = (ERROR)=>{
+    let errors = {}
+    const errorExtensionValidation = ERROR[0].extensions.validation;
+    if(errorExtensionValidation){
+      console.log("Regular : ",ERROR);
+      const extensionsValiName = errorExtensionValidation?.["input.user_input.name"] 
+      const extensionsValiEmail = errorExtensionValidation?.["input.user_input.email"] 
+      const extensionsValiForceEmail = errorExtensionValidation?.["input.user_input.force_email"] 
+      const extensionsValiPhone = errorExtensionValidation?.["input.user_input.phone"]
+      const extensionsValiDate = errorExtensionValidation?.["input.user_salary_config_input.salary_config.start_at"] 
+      
+      errors.name = extensionsValiName ? extensionsValiName[0] : "" 
+      errors.email = extensionsValiEmail ? extensionsValiEmail[0] : extensionsValiForceEmail ? extensionsValiForceEmail[0] : ""
+      errors.phone = extensionsValiPhone ? extensionsValiPhone[0] : "" 
+      errors.startDate = extensionsValiDate ? extensionsValiDate[0] : "" 
+   }else {
+       console.log("SWAL: ",ERROR);
+      Swal.fire("Error!",ERROR[0].message)
+   }
+      setErrors(errors)
+  }
+
   // Submit Form
   const handleSubmitUpdate = async (e) => {
     e.preventDefault();
+    setErrors({})
     if (true) {
       handelLoading(true);
-      // console.log('Form submitted:', { name, email, phone });
-      // Do something with the form data
-      // console.log(userData);
+
       try {
         // Update method
         if (userDataToEdit.id !== undefined) {
           console.log(userData);
           const { data } = await updateUserQL({
             variables: {
-              ext: {
-                id: userDataToEdit?.id,
-                name: userData.name,
-                starts_at: userData.starts_at,
-                email: userData.email,
-                phone: userData.phone,
-                department_id: userData.department,
-                // user_image:userData.img_path,
-                manager_id: userData.manager,
-                company_id: userData.office,
-                office_id: userData.office,
-                has_credentials: 0,
-                position_id: userData.position,
-                att_profile_id: userData.attendance_profile,
-                can_work_home: userData.can_work_home,
-                max_homeDays_per_week: 0,
-                flexible_home: 0,
-                can_ex_days: 0,
-                copied_managers: userData.copied_managers.map(
-                  (manag) => manag.id
-                ),
-              },
+              ext: variable,
             },
-            update: (cache, { data }) => {
-              // Update the cache manually with the updated data
-              // console.log('Cache',data.update_user);
-
-              // const test = cache.readQuery({
-              //   query: GET_COMPANY_USERS,
-              //   variables: {
-              //     first: numOfCard,
-              //     page: pageNumber,
-              //     input: searchText,
-              //   },
-              // })
-              // console.log('info', test);
-
-              cache.writeQuery({
-                query: GET_COMPANY_USERS,
-                variables: {
-                  first: numOfCard,
-                  page: pageNumber,
-                  input: searchText,
-                },
-                data: {
-                  company_users: {
-                    data: data.update_user,
-                  },
-                  // paginatorInfo: {
-                  //   first: numOfCard,
-                  //   page: pageNumber,
-                  //   input: searchText,
-                  // }
-                },
-              });
+            onError({ networkError, graphQLErrors }) {
+              if (graphQLErrors) {
+                validationHandler(graphQLErrors)
+              }
+              if (networkError) {
+                console.log(" [Network error]:", networkError);
+              }
             },
+            // update: (cache, { data }) => {
+            //   cache.writeQuery({
+            //     query: GET_COMPANY_USERS,
+            //     variables: {
+            //       first: numOfCard,
+            //       page: pageNumber,
+            //       input: searchText,
+            //     },
+            //     data: {
+            //       company_users: {
+            //         data: data.update_user,
+            //       },
+            //       // paginatorInfo: {
+            //       //   first: numOfCard,
+            //       //   page: pageNumber,
+            //       //   input: searchText,
+            //       // }
+            //     },
+            //   });
+            // },
             onCompleted: (data) => {
               Swal.fire("User Updated!", "", "success");
+              setUserData(initState)
               closeModal();
             },
           });
@@ -217,58 +228,16 @@ const AddNewForm = ({
 
           const { data } = await addUserQL({
             variables: {
-              userInput: {
-                name: userData.name,
-                starts_at: userData.starts_at,
-                email: userData.email,
-                phone: userData.phone,
-                department_id: userData.department,
-                manager_id: userData.manager,
-                company_id: userData.office,
-                office_id: userData.office,
-                position_id: userData.position,
-                att_profile_id: userData.attendance_profile,
-                can_work_home: userData.can_work_home,
-                role_id: "6",
-                copied_managers: userData.copied_managers.map(
-                  (manag) => manag.id
-                ),
-                has_credentials: 1,
-                max_homeDays_per_week: 0,
-                flexible_home: 0,
-                can_ex_days: 0,
-              },
+              userInput: {...variable,role_id:userData.role,},
               userSalaryInput: {
                 salary_config: {
                   start_at: userData.starts_at,
                 },
               },
             },
-            // onError({networkError,graphQLErrors}) {
-            //   if (graphQLErrors) {
-            //             graphQLErrors.map(({ extensions }) =>Swal.fire("Error!", extensions.reason, "error"));
-            //         }
-            //         if (networkError) {
-            //             console.log(" [Network error]:", networkError)
-            //         };
-            // },
             onError({ networkError, graphQLErrors }) {
               if (graphQLErrors) {
-                let errors = {};
-
-                const extensionsValiName = graphQLErrors[0].extensions.validation["input.user_input.name"]
-                const extensionsValiEmail = graphQLErrors[0].extensions.validation["input.user_input.email"]
-                const extensionsValiPhone = graphQLErrors[0].extensions.validation["input.user_input.phone"]
-                const extensionsValiDate = graphQLErrors[0].extensions.validation["input.user_salary_config_input.salary_config.start_at"]
-                
-                errors.name = extensionsValiName ? extensionsValiName[0] : "" 
-                errors.email = extensionsValiEmail ? extensionsValiEmail[0] : ""
-                errors.phone = extensionsValiPhone ? extensionsValiPhone[0] : "" 
-                errors.startDate = extensionsValiDate ? extensionsValiDate[0] : "" 
-                setErrors(errors)
-
-                // console.log(graphQLErrors[0].extensions.validation["input.user_input.email"][0]);
-
+                validationHandler(graphQLErrors)
               }
               if (networkError) {
                 console.log(" [Network error]:", networkError);
@@ -286,11 +255,11 @@ const AddNewForm = ({
             ],
             onCompleted: (data) => {
               Swal.fire("User Added!", "", "success");
+              setUserData(initState)
               closeModal();
             },
           });
         }
-
         handelLoading(false);
       } catch (error) {
         let { graphQLErrors } = error;
@@ -307,16 +276,7 @@ const AddNewForm = ({
     return arr.find((ele) => ele.id == id);
   };
 
-  //
   const managerOptions = () => {
-    // const res = optionsDATA.employeesName.filter(userInfo=>{
-    //   if(userData.copied_managers.length > 0){
-    //     return userData.copied_managers.some(copied=> copied.id !== userInfo.id)
-    //   }else {
-    //     return optionsDATA.employeesName
-    //   }
-    // })
-
     const res = optionsDATA.employeesName.filter((userInfo) => {
       return !userData.copied_managers.some(
         (copied) => copied.id === userInfo.value
@@ -366,24 +326,44 @@ const AddNewForm = ({
     setUserData((prev) => ({ ...prev, img_path: "" }));
   };
 
+  const [get_user_and_options,{loading: loadingUser}] = useLazyQuery(GET_USER_BY_ID)
+
+  const featchOptions = async()=>{
+    const user = await get_user_and_options({variables:{id:"13",first: 100}})
+    console.log(user.data);
+      setOptionsDATA({
+        departments: user.data.company_departments.data,
+        offices: user.data.offices.data,
+        attendance_profiles: user.data.attendance_profiles.data,
+        positions: user.data.positions.data,
+        employeesName: user.data.company_users.data,
+        roles: user.data.profile.company.currentSubscription.plan.roles,
+      });
+  }
+  
+
   useEffect(() => {
     // console.log('Label: ', getLabel(userData.attendance_profile,optionsDATA.attendance_profiles)?.name);
-    if (typeof data !== "undefined") {
-      setOptionsDATA({
-        departments: data.company_departments.data,
-        offices: data.offices.data,
-        attendance_profiles: data.attendance_profiles.data,
-        positions: data.positions.data,
-        employeesName: data.company_users.data,
-        roles: data.profile.company.currentSubscription.plan.roles,
-      });
+    // if (typeof data !== "undefined") {
+      // setOptionsDATA({
+      //   departments: data.company_departments.data,
+      //   offices: data.offices.data,
+      //   attendance_profiles: data.attendance_profiles.data,
+      //   positions: data.positions.data,
+      //   employeesName: data.company_users.data,
+      //   roles: data.profile.company.currentSubscription.plan.roles,
+      // });
+
       // console.log(optionsDATA);
-    }
+    // }
+    featchOptions()
+    
+    
 
     if (isSaveForm) {
       validateForm();
     }
-  }, [userData, data]);
+  }, [userData,get_user_and_options]);
 
   const handleInputChange = (e) => {
     const { target } = e;
@@ -549,8 +529,8 @@ const AddNewForm = ({
             <ModalTitle text="Office Info" />
 
             {/* Inputs */}
-            <div className="flex justify-between items-center flex-wrap">
-              <div className="w-full flex flex-col  mb-4 relative">
+            <div className="grid grid-cols-2 gap-x-[32px]">
+              <div className="w-full flex flex-col  mb-4 relative col-span-full">
                 <label
                   className={`text-[13px] ${
                     errors.office ? "text-red-400" : "text-[#313030]"
@@ -570,7 +550,7 @@ const AddNewForm = ({
                 {errors.office && <ErrorSpan text={errors.office} />}
               </div>
 
-              <div className="w-1/2 flex flex-col  mb-4 relative">
+              <div className="flex flex-col  mb-4 relative">
                 <label
                   htmlFor="department"
                   className={`text-[13px] ${
@@ -590,7 +570,7 @@ const AddNewForm = ({
                 {errors.department && <ErrorSpan text={errors.department} />}
               </div>
 
-              <div className="w-1/2 flex flex-col pl-[32px] mb-4 relative">
+              <div className="flex flex-col  mb-4 relative">
                 <label
                   className={`text-[13px] ${
                     errors.attendance ? "text-red-400" : "text-[#313030]"
@@ -610,32 +590,33 @@ const AddNewForm = ({
                 {errors.attendance && <ErrorSpan text={errors.attendance} />}
               </div>
 
-              {/* {
-                userDataToEdit.id == undefined && ()
-              } */}
+               {
+                userDataToEdit.id == undefined && (
+                <div className="flex flex-col  mb-4 relative">
+                  <label
+                    className={`text-[13px] ${
+                      errors.role ? "text-red-400" : "text-[#313030]"
+                    }`}
+                    htmlFor="role"
+                  >
+                    Role
+                  </label>
+                  <SelectInput
+                    id="role"
+                    isLoading={loading}
+                    changeHandler={setUserData}
+                    options={optionsDATA.roles}
+                    isError={errors.role}
+                    value={userData.role}
+                    label={getLabel(userData.role, optionsDATA.roles)?.name}
+                  />
+                  {errors.role && <ErrorSpan text={errors.role} />}
+                </div>
+                )
+              } 
 
-              <div className="w-1/2 flex flex-col  mb-4 relative">
-                <label
-                  className={`text-[13px] ${
-                    errors.role ? "text-red-400" : "text-[#313030]"
-                  }`}
-                  htmlFor="role"
-                >
-                  Role
-                </label>
-                <SelectInput
-                  id="role"
-                  isLoading={loading}
-                  changeHandler={setUserData}
-                  options={optionsDATA.roles}
-                  isError={errors.role}
-                  value={userData.role}
-                  label={getLabel(userData.role, optionsDATA.roles)?.name}
-                />
-                {errors.role && <ErrorSpan text={errors.role} />}
-              </div>
 
-              <div className="w-1/2 flex flex-col pl-[32px] mb-4 relative">
+              <div className="flex flex-col  mb-4 relative">
                 <label
                   className={`text-[13px] ${
                     errors.position ? "text-red-400" : "text-[#313030]"
@@ -658,7 +639,7 @@ const AddNewForm = ({
                 {errors.position && <ErrorSpan text={errors.position} />}
               </div>
 
-              <div className="w-1/2 flex flex-col relative">
+              <div className="flex flex-col mb-4 relative">
                 <label
                   className={`text-[13px] ${
                     errors.manager ? "text-red-400" : "text-[#313030]"
@@ -681,11 +662,9 @@ const AddNewForm = ({
                 {errors.manager && <ErrorSpan text={errors.manager} />}
               </div>
 
-              <div className="w-1/2 flex flex-col pl-[32px] relative">
+              <div className="flex flex-col  relative">
                 <label
-                  className={`text-[13px] ${
-                    errors.manager ? "text-red-400" : "texwt-[#313030]"
-                  }`}
+                  className={`text-[13px] text-[#313030] `}
                   htmlFor="copied_managers"
                 >
                   Copied Manager
@@ -695,7 +674,7 @@ const AddNewForm = ({
                   isLoading={loading}
                   changeHandler={setUserData}
                   options={optionsDATA.employeesName.filter(
-                    (optdata) => optdata.value !== userData.manager.value
+                    (optdata) => optdata.value !== userData.manager
                   )}
                   isError={errors.manager}
                   value={userData.copied_managers}
@@ -704,7 +683,7 @@ const AddNewForm = ({
                   //   getLabel(userData.copied_managers, optionsDATA.employeesName)?.name
                   // }
                 />
-                {errors.manager && <ErrorSpan text={errors.manager} />}
+                {/* {errors.manager && <ErrorSpan text={errors.manager} />} */}
               </div>
             </div>
             {/* End Inputs */}

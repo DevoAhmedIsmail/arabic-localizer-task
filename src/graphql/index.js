@@ -48,7 +48,7 @@ export const GET_COMPANY_USERS = gql`
 `;
 
 export const GET_USER_BY_ID = gql`
-  query get_user($id: ID!) {
+  query get_user($id: ID!,$first: Int!) {
     user(id: $id) {
       id
       name
@@ -82,7 +82,52 @@ export const GET_USER_BY_ID = gql`
         id
       }
     }
+    
+    company_users {
+      data {
+        value:id
+        label:name
+      }
+    }
+    company_departments(first: $first) {
+      data {
+        label:name
+        value:id
+      }
+    }
+    positions(first: $first) {
+      data {
+        label:name
+        value:id
+      }
+    }
+    attendance_profiles(first: $first) {
+      data {
+        label:name
+        value:id
+      }
+    }
+    offices(first: $first) {
+      data {
+        label:name
+        value:id
+      }
+    }
+    profile {
+      company {
+        currentSubscription {
+          plan {
+            roles {
+              label:name
+              value:id
+            }
+          }
+        }
+      }
+    }
   }
+
+  
 `;
 
 // export const GET_DEPARTMENTS = gql`

@@ -119,7 +119,7 @@ const CardItem = ({
                 },
               })
                 .then((res) => {
-                  console.log(res);
+                  // console.log(res);
                   if (res.data.delete_user.status === "success") {
                     Swal.fire({
                       timer: 2000,
@@ -144,9 +144,10 @@ const CardItem = ({
   };
 
   const [get_user_id,{loading: loadingUser}] = useLazyQuery(GET_USER_BY_ID)
-
+// console.log("get_user_id ",get_user_id);
   const UpdateUserHandler = async(id) => {
-    const user = await get_user_id({variables:{id}})
+    const user = await get_user_id({variables:{id,first: 100}})
+    // console.log("user ", user);
     showModalHandler(user.data.user);
   };
   const wrapperRef = useRef(null);
