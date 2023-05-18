@@ -1,0 +1,36 @@
+const initState = {
+  name: "",
+  img_path: "",
+  starts_at: "",
+  phone: "",
+  email: "",
+  attendance_profile: 0,
+  department: 0,
+  manager: 0,
+  copied_managers: [],
+  office: 0,
+  position: 0,
+  role: 0,
+  can_work_home: 0,
+};
+
+
+**************** at 292 AddNewForm ***************************
+
+const { name, img_path, starts_at, phone, email, attendance_profile, department, manager, copied_managers, office, position, can_work_home } = userDataToEdit;
+
+setUserData({
+  ...initState,
+  name,
+  img_path,
+  starts_at,
+  phone,
+  email,
+  attendance_profile: attendance_profile?.id || initState.attendance_profile,
+  department: department?.id || initState.department,
+  manager: manager?.id || initState.manager,
+  copied_managers,
+  office: office?.id || initState.office,
+  position: position?.id || initState.position,
+  can_work_home,
+});

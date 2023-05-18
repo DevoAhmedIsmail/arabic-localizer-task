@@ -1,0 +1,94 @@
+export const GET_USER_BY_ID = gql`
+  query get_user($id: ID!, $first: Int!, $includeUser: Boolean!) {
+    user(id: $id) @include(if: $includeUser) {
+      id
+      name
+      img_path
+      starts_at
+      phone
+      email
+      attendance_profile {
+        name
+        id
+      }
+      can_work_home
+      department {
+        name
+        id
+      }
+      manager {
+        name
+        id
+      }
+      copied_managers {
+        name
+        id
+      }
+      office {
+        name
+        id
+      }
+      position {
+        name
+        id
+      }
+    }
+    
+    company_users {
+      data {
+        value: id
+        label: name
+      }
+    }
+    company_departments(first: $first) {
+      data {
+        label: name
+        value: id
+      }
+    }
+    positions(first: $first) {
+      data {
+        label: name
+        value: id
+      }
+    }
+    attendance_profiles(first: $first) {
+      data {
+        label: name
+        value: id
+      }
+    }
+    offices(first: $first) {
+      data {
+        label: name
+        value: id
+      }
+    }
+    profile {
+      company {
+        currentSubscription {
+          plan {
+            roles {
+              label: name
+              value: id
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+
+client.query({
+  query: GET_USER_BY_ID,
+  variables: {
+    id: "123",
+    first: 10,
+    includeUser: true // or false, depending on your logic
+  }
+}).then(result => {
+  // Handle the query result here
+}).catch(error => {
+  // Handle any errors here
+});

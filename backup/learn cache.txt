@@ -1,0 +1,66 @@
+import { useMutation, gql } from '@apollo/client';
+
+const ADD_USER = gql`
+  mutation AddUser($name: String!, $email: String!) {
+    addUser(name: $name, email: $email) {
+      id
+      name
+      email
+    }
+  }
+`;
+
+const GET_USERS = gql`
+  query GetUsers {
+    users {
+      id
+      name
+      email
+    }
+  }
+`;
+
+function AddUserForm() {
+  const [addUser] = useMutation(ADD_USER);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const name = event.target.name.value;
+    const email = event.target.email.value;
+
+    try {
+      const { data } = await addUser({
+        variables: { name, email },
+        update: (cache, { data: { addUser } }) => {
+          const existingData = cache.readQuery({ query: GET_USERS });
+
+          const newUsers = [
+            ...existingData.users,
+            addUser
+          ];
+
+          cache.writeQuery({
+            query: GET_USERS,
+            data: {
+              users: newUsers
+            }
+          });
+        },
+      });
+    } catch (error) {
+      console.error('Error adding user:', error);
+    }
+
+    // Clear the form inputs
+    event.target.reset();
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input type="text" name="name" placeholder="Name" required />
+      <input type="email" name="email" placeholder="Email" required />
+      <button type="submit">Add User</button>
+    </form>
+  );
+}
