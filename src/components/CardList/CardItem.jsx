@@ -7,9 +7,13 @@ import { RiDeleteBin2Fill } from "react-icons/ri";
 import { TbExclamationMark } from "react-icons/tb";
 import { MdCallEnd } from "react-icons/md";
 import AttendLabel from "./AttendLabel";
-import { EmployeeContext } from "../../context/EmployeeProvider";
 import Swal from "sweetalert2";
-import { useMutation, useApolloClient, useQuery, useLazyQuery } from "@apollo/client";
+import {
+  useMutation,
+  useApolloClient,
+  useQuery,
+  useLazyQuery,
+} from "@apollo/client";
 import { DELETE_USER, GET_COMPANY_USERS, GET_USER_BY_ID } from "../../graphql";
 import LoadingSpinner from "../LoadingSpinner";
 
@@ -19,12 +23,12 @@ const CardItem = ({
   pageNumber,
   numOfCard,
   showModalHandler,
+  addOptions,
 }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
   const [showName, setShowName] = useState(false);
-  // const { deleteEmployee } = useContext(EmployeeContext);
   const client = useApolloClient();
   const [
     deleteUserQL,
@@ -80,42 +84,15 @@ const CardItem = ({
                   },
                 ],
 
-              onError({networkError,graphQLErrors}) {
-                if (graphQLErrors) {
-                          graphQLErrors.map(({ extensions }) =>swalWithClasses.fire("Error!", extensions.reason, "error"));
-                      }
-                      if (networkError) {
-                          console.log(" [Network error]:", networkError)
-                      };
-              },
-          
-                // TODO: not working
-                update(cache, { data }) {
-                  // const {company_users} = cache.readQuery({query: GET_COMPANY_USERS});
-                  // cache.writeQuery({
-                  //   query: GET_COMPANY_USERS,
-                  //   data: {
-                  //     company_users: {
-                  //       data: company_users.data.filter(user=> user.id !== id)
-                  //     }
-                  //   }
-                  // })
-                  // cache.modify({
-                  //   fields: {
-                  //     company_users(existingUsers,{readField}) {
-                  //       console.log(existingUsers);
-                  //       return existingUsers.data.filter(userRef=> data.id !==readField('id', userRef))
-                  //     }
-                  //   }
-                  // })
-                  // cache.modify({
-                  //   id: cache.identify(data),
-                  //   fields: {
-                  //     company_users(existingUsers, {DELETE}){
-                  //       return DELETE
-                  //     }
-                  //   }
-                  // })
+                onError({ networkError, graphQLErrors }) {
+                  if (graphQLErrors) {
+                    graphQLErrors.map(({ extensions }) =>
+                      swalWithClasses.fire("Error!", extensions.reason, "error")
+                    );
+                  }
+                  if (networkError) {
+                    console.log(" [Network error]:", networkError);
+                  }
                 },
               })
                 .then((res) => {
@@ -143,16 +120,17 @@ const CardItem = ({
       });
   };
 
-  const [get_user_id,{loading: loadingUser}] = useLazyQuery(GET_USER_BY_ID)
-// console.log("get_user_id ",get_user_id);
-  const UpdateUserHandler = async(id) => {
-    const user = await get_user_id({variables:{id,first: 100}})
-    // console.log("user ", user);
+  const [get_user_id, { loading: loadingUser }] = useLazyQuery(GET_USER_BY_ID);
+  const UpdateUserHandler = async (id) => {
+    const user = await get_user_id({
+      variables: { id, first: 100, includeUser: true },
+      fetchPolicy: "network-only",
+    });
+    addOptions(user);
     showModalHandler(user.data.user);
   };
   const wrapperRef = useRef(null);
   useEffect(() => {
-    // console.log(data);
     const handleClickOutside = (event) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
         setShowDetails(false);

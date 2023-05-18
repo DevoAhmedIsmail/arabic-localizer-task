@@ -48,8 +48,8 @@ export const GET_COMPANY_USERS = gql`
 `;
 
 export const GET_USER_BY_ID = gql`
-  query get_user($id: ID!,$first: Int!) {
-    user(id: $id) {
+  query get_user($id: ID, $first: Int!, $includeUser: Boolean!) {
+    user(id: $id) @include(if: $includeUser) {
       id
       name
       img_path
@@ -85,32 +85,32 @@ export const GET_USER_BY_ID = gql`
     
     company_users {
       data {
-        value:id
-        label:name
+        value: id
+        label: name
       }
     }
     company_departments(first: $first) {
       data {
-        label:name
-        value:id
+        label: name
+        value: id
       }
     }
     positions(first: $first) {
       data {
-        label:name
-        value:id
+        label: name
+        value: id
       }
     }
     attendance_profiles(first: $first) {
       data {
-        label:name
-        value:id
+        label: name
+        value: id
       }
     }
     offices(first: $first) {
       data {
-        label:name
-        value:id
+        label: name
+        value: id
       }
     }
     profile {
@@ -118,16 +118,14 @@ export const GET_USER_BY_ID = gql`
         currentSubscription {
           plan {
             roles {
-              label:name
-              value:id
+              label: name
+              value: id
             }
           }
         }
       }
     }
   }
-
-  
 `;
 
 // export const GET_DEPARTMENTS = gql`

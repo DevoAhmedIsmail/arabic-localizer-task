@@ -6,17 +6,9 @@ import { SelectInput, SelectMultiInput } from "./Inputs";
 import ErrorSpan from "./ErrorSpan";
 import { MdClose } from "react-icons/md";
 import Swal from "sweetalert2";
-import {
-  ADD_USER,
-  GET_ALL_OPTIONS,
-  GET_COMPANY_USERS,
-  GET_USER_BY_ID,
-  UPDATE_USER,
-} from "../graphql";
-import { useApolloClient, useLazyQuery, useMutation, useQuery } from "@apollo/client";
+import { ADD_USER, GET_COMPANY_USERS, UPDATE_USER } from "../graphql";
+import { useApolloClient, useMutation } from "@apollo/client";
 import LoadingSpinner from "./LoadingSpinner";
-
-
 
 const AddNewForm = ({
   closeModal,
@@ -24,9 +16,8 @@ const AddNewForm = ({
   pageNumber,
   numOfCard,
   searchText,
-  handelLoading,
+  options,
 }) => {
-
   const initState = {
     name: "",
     img_path: "",
@@ -44,24 +35,12 @@ const AddNewForm = ({
   };
 
   const [userData, setUserData] = useState(initState);
-  // console.log(userData);
-  const [optionsDATA, setOptionsDATA] = useState({
-    departments: [],
-    positions: [],
-    offices: [],
-    attendance_profiles: [],
-    employeesName: [],
-    roles: [],
-  });
   const [isSaveForm, setIsSaveForm] = useState(false);
   const [errors, setErrors] = useState({});
   const client = useApolloClient();
 
   // to store image which come form user
   const [selectedImage, setSelectedImage] = useState(null);
-
-  // Add Employee to context
-  const { addEmployee } = useContext(EmployeeContext);
 
   // variable to send to server
   const variable = {
@@ -77,56 +56,12 @@ const AddNewForm = ({
     position_id: userData.position,
     att_profile_id: userData.attendance_profile,
     can_work_home: userData.can_work_home,
-    copied_managers: userData.copied_managers.map(
-      (manag) => manag.id
-    ),
+    copied_managers: userData.copied_managers.map((manag) => manag.id),
     has_credentials: 1,
     max_homeDays_per_week: 0,
     flexible_home: 0,
     can_ex_days: 0,
-  }
-
-  // Validations
-  function validateForm() {
-    let errors = {};
-    if (!userData.name) {
-      errors.name = "Name is required";
-    }
-    if (!userData.email) {
-      errors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(userData.email)) {
-      errors.email = "Email is invalid";
-    }
-    if (!userData.phone) {
-      errors.phone = "Phone is required";
-    } else if (!/^\d{10}$/) {
-      errors.phone = "Phone is invalid";
-    }
-    if (!userData.position) {
-      errors.position = "Position is required";
-    }
-    if (!userData.department) {
-      errors.department = "Department is required";
-    }
-    if (!userData.attendance_profile) {
-      errors.attendance = "Attendance is required";
-    }
-    if (!userData.office) {
-      errors.office = "Office is required";
-    }
-    // if (!userData.role) {
-    //   errors.role = "Role is required";
-    // }
-    if (!userData.starts_at) {
-      errors.startDate = "Start Date is required";
-    }
-    if (!userData.manager) {
-      errors.manager = "Manager is required";
-    }
-
-    setErrors(errors);
-    return Object.keys(errors).length === 0;
-  }
+  };
 
   // Handle Image come from user
   const handleImageUpload = (event) => {
@@ -140,47 +75,54 @@ const AddNewForm = ({
     }
   };
 
-  // Fetch from graphql
-  const { loading, error, data: dataOptions, refetch } = useQuery(GET_ALL_OPTIONS, {
-    variables: { first: 100 },
-  });
-
-
-
   // Push Values to api
   const [updateUserQL, { loading: updateLoading }] = useMutation(UPDATE_USER);
   const [addUserQL, { loading: createUserLoading }] = useMutation(ADD_USER);
 
   // Validation on Error coming from server
-  const validationHandler = (ERROR)=>{
-    let errors = {}
+  const validationHandler = (ERROR) => {
+    let errors = {};
     const errorExtensionValidation = ERROR[0].extensions.validation;
-    if(errorExtensionValidation){
-      console.log("Regular : ",ERROR);
-      const extensionsValiName = errorExtensionValidation?.["input.user_input.name"] 
-      const extensionsValiEmail = errorExtensionValidation?.["input.user_input.email"] 
-      const extensionsValiForceEmail = errorExtensionValidation?.["input.user_input.force_email"] 
-      const extensionsValiPhone = errorExtensionValidation?.["input.user_input.phone"]
-      const extensionsValiDate = errorExtensionValidation?.["input.user_salary_config_input.salary_config.start_at"] 
-      
-      errors.name = extensionsValiName ? extensionsValiName[0] : "" 
-      errors.email = extensionsValiEmail ? extensionsValiEmail[0] : extensionsValiForceEmail ? extensionsValiForceEmail[0] : ""
-      errors.phone = extensionsValiPhone ? extensionsValiPhone[0] : "" 
-      errors.startDate = extensionsValiDate ? extensionsValiDate[0] : "" 
-   }else {
-       console.log("SWAL: ",ERROR);
-      Swal.fire("Error!",ERROR[0].message)
-   }
-      setErrors(errors)
-  }
+    if (errorExtensionValidation) {
+      console.log("Regular : ", ERROR);
+      const extensionsValiName =
+        errorExtensionValidation?.["input.user_input.name"];
+      const extensionsValiEmail =
+        errorExtensionValidation?.["input.user_input.email"];
+      const extensionsValiForceEmail =
+        errorExtensionValidation?.["input.user_input.force_email"];
+      const extensionsValiPhone =
+        errorExtensionValidation?.["input.user_input.phone"];
+      const extensionsValiDate =
+        errorExtensionValidation?.[
+          "input.user_salary_config_input.salary_config.start_at"
+        ];
+      const extensionsValiAttProfile =
+        errorExtensionValidation?.["input.user_input.force_update_att_profile"];
+
+      errors.name = extensionsValiName ? extensionsValiName[0] : "";
+      errors.email = extensionsValiEmail
+        ? extensionsValiEmail[0]
+        : extensionsValiForceEmail
+        ? extensionsValiForceEmail[0]
+        : "";
+      errors.phone = extensionsValiPhone ? extensionsValiPhone[0] : "";
+      errors.startDate = extensionsValiDate ? extensionsValiDate[0] : "";
+      errors.attendance = extensionsValiAttProfile
+        ? extensionsValiAttProfile[0]
+        : "";
+    } else {
+      console.log("SWAL: ", ERROR);
+      Swal.fire("Error!", ERROR[0].message);
+    }
+    setErrors(errors);
+  };
 
   // Submit Form
   const handleSubmitUpdate = async (e) => {
     e.preventDefault();
-    setErrors({})
+    setErrors({});
     if (true) {
-      handelLoading(true);
-
       try {
         // Update method
         if (userDataToEdit.id !== undefined) {
@@ -191,44 +133,23 @@ const AddNewForm = ({
             },
             onError({ networkError, graphQLErrors }) {
               if (graphQLErrors) {
-                validationHandler(graphQLErrors)
+                validationHandler(graphQLErrors);
               }
               if (networkError) {
                 console.log(" [Network error]:", networkError);
               }
             },
-            // update: (cache, { data }) => {
-            //   cache.writeQuery({
-            //     query: GET_COMPANY_USERS,
-            //     variables: {
-            //       first: numOfCard,
-            //       page: pageNumber,
-            //       input: searchText,
-            //     },
-            //     data: {
-            //       company_users: {
-            //         data: data.update_user,
-            //       },
-            //       // paginatorInfo: {
-            //       //   first: numOfCard,
-            //       //   page: pageNumber,
-            //       //   input: searchText,
-            //       // }
-            //     },
-            //   });
-            // },
             onCompleted: (data) => {
               Swal.fire("User Updated!", "", "success");
-              setUserData(initState)
+              setUserData(initState);
               closeModal();
             },
           });
         } else {
-          // Add new User
-
+          // Add new User method
           const { data } = await addUserQL({
             variables: {
-              userInput: {...variable,role_id:userData.role,},
+              userInput: { ...variable, role_id: userData.role },
               userSalaryInput: {
                 salary_config: {
                   start_at: userData.starts_at,
@@ -237,7 +158,7 @@ const AddNewForm = ({
             },
             onError({ networkError, graphQLErrors }) {
               if (graphQLErrors) {
-                validationHandler(graphQLErrors)
+                validationHandler(graphQLErrors);
               }
               if (networkError) {
                 console.log(" [Network error]:", networkError);
@@ -255,12 +176,11 @@ const AddNewForm = ({
             ],
             onCompleted: (data) => {
               Swal.fire("User Added!", "", "success");
-              setUserData(initState)
+              setUserData(initState);
               closeModal();
             },
           });
         }
-        handelLoading(false);
       } catch (error) {
         let { graphQLErrors } = error;
         console.log(error);
@@ -271,37 +191,48 @@ const AddNewForm = ({
     }
   };
 
-  // get Label
-  const getLabel = (id, arr) => {
-    return arr.find((ele) => ele.id == id);
-  };
-
   const managerOptions = () => {
-    const res = optionsDATA.employeesName.filter((userInfo) => {
+    const res = options.employeesName.filter((userInfo) => {
       return !userData.copied_managers.some(
         (copied) => copied.id === userInfo.value
       );
     });
     return res;
-    // console.log("userData.copied_managers ",userData.copied_managers.some(copied=> copied.id == '10'));
   };
 
   const wrapperRef = useRef(null);
   useEffect(() => {
     if (userDataToEdit.id !== undefined) {
+      const {
+        name,
+        img_path,
+        starts_at,
+        phone,
+        email,
+        attendance_profile,
+        department,
+        manager,
+        copied_managers,
+        office,
+        position,
+        can_work_home,
+      } = userDataToEdit;
+
       setUserData({
-        name: userDataToEdit.name,
-        img_path: userDataToEdit.img_path,
-        starts_at: userDataToEdit.starts_at,
-        phone: userDataToEdit.phone,
-        email: userDataToEdit.email,
-        attendance_profile: userDataToEdit.attendance_profile?.id,
-        department: userDataToEdit.department?.id,
-        manager: userDataToEdit.manager?.id,
-        copied_managers: userDataToEdit.copied_managers,
-        office: userDataToEdit.office?.id,
-        position: userDataToEdit.position?.id,
-        can_work_home: userDataToEdit.can_work_home,
+        ...initState,
+        name,
+        img_path,
+        starts_at,
+        phone,
+        email,
+        attendance_profile:
+          attendance_profile?.id || initState.attendance_profile,
+        department: department?.id || initState.department,
+        manager: manager?.id || initState.manager,
+        copied_managers,
+        office: office?.id || initState.office,
+        position: position?.id || initState.position,
+        can_work_home,
       });
     } else {
       setUserData(initState);
@@ -326,45 +257,6 @@ const AddNewForm = ({
     setUserData((prev) => ({ ...prev, img_path: "" }));
   };
 
-  const [get_user_and_options,{loading: loadingUser}] = useLazyQuery(GET_USER_BY_ID)
-
-  const featchOptions = async()=>{
-    const user = await get_user_and_options({variables:{id:"13",first: 100}})
-    console.log(user.data);
-      setOptionsDATA({
-        departments: user.data.company_departments.data,
-        offices: user.data.offices.data,
-        attendance_profiles: user.data.attendance_profiles.data,
-        positions: user.data.positions.data,
-        employeesName: user.data.company_users.data,
-        roles: user.data.profile.company.currentSubscription.plan.roles,
-      });
-  }
-  
-
-  useEffect(() => {
-    // console.log('Label: ', getLabel(userData.attendance_profile,optionsDATA.attendance_profiles)?.name);
-    // if (typeof data !== "undefined") {
-      // setOptionsDATA({
-      //   departments: data.company_departments.data,
-      //   offices: data.offices.data,
-      //   attendance_profiles: data.attendance_profiles.data,
-      //   positions: data.positions.data,
-      //   employeesName: data.company_users.data,
-      //   roles: data.profile.company.currentSubscription.plan.roles,
-      // });
-
-      // console.log(optionsDATA);
-    // }
-    featchOptions()
-    
-    
-
-    if (isSaveForm) {
-      validateForm();
-    }
-  }, [userData,get_user_and_options]);
-
   const handleInputChange = (e) => {
     const { target } = e;
     setUserData((prev) => ({ ...prev, [target.name]: target.value }));
@@ -375,16 +267,16 @@ const AddNewForm = ({
       className="fixed top-0 left-0 w-full min-h-screen z-30 flex justify-center items-center"
       style={{ backgroundColor: "rgba(40, 104, 174, 0.43)" }}
     >
-      {createUserLoading && (
+      {(createUserLoading || updateLoading) && (
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[10]">
           <LoadingSpinner />
         </div>
       )}
-      {updateLoading && (
+      {/* {updateLoading && (
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[10]">
           <LoadingSpinner />
         </div>
-      )}
+      )} */}
       <div
         className="bg-white pt-[11px] pb-[0px] p-5 max-h-[100vh] min-h-[710px] md:min-h-[717px] w-[90%] md:w-[700px] lg:w-[1000px] overflow-auto rounded-[4px]"
         ref={wrapperRef}
@@ -542,10 +434,10 @@ const AddNewForm = ({
                 <SelectInput
                   id="office"
                   changeHandler={setUserData}
-                  options={optionsDATA.offices}
+                  options={options.offices}
                   isError={errors.office}
                   value={userData.office}
-                  isLoading={loading}
+                  // isLoading={loading}
                 />
                 {errors.office && <ErrorSpan text={errors.office} />}
               </div>
@@ -561,9 +453,9 @@ const AddNewForm = ({
                 </label>
                 <SelectInput
                   id="department"
-                  isLoading={loading}
+                  // isLoading={loading}
                   changeHandler={setUserData}
-                  options={optionsDATA.departments}
+                  options={options.departments}
                   isError={errors.department}
                   value={userData.department}
                 />
@@ -581,17 +473,16 @@ const AddNewForm = ({
                 </label>
                 <SelectInput
                   id="attendance_profile"
-                  isLoading={loading}
+                  // isLoading={loading}
                   changeHandler={setUserData}
-                  options={optionsDATA.attendance_profiles}
+                  options={options.attendance_profiles}
                   isError={errors.attendance}
                   value={userData.attendance_profile}
                 />
                 {errors.attendance && <ErrorSpan text={errors.attendance} />}
               </div>
 
-               {
-                userDataToEdit.id == undefined && (
+              {userDataToEdit.id == undefined && (
                 <div className="flex flex-col  mb-4 relative">
                   <label
                     className={`text-[13px] ${
@@ -603,18 +494,15 @@ const AddNewForm = ({
                   </label>
                   <SelectInput
                     id="role"
-                    isLoading={loading}
+                    // isLoading={loading}
                     changeHandler={setUserData}
-                    options={optionsDATA.roles}
+                    options={options.roles}
                     isError={errors.role}
                     value={userData.role}
-                    label={getLabel(userData.role, optionsDATA.roles)?.name}
                   />
                   {errors.role && <ErrorSpan text={errors.role} />}
                 </div>
-                )
-              } 
-
+              )}
 
               <div className="flex flex-col  mb-4 relative">
                 <label
@@ -627,14 +515,11 @@ const AddNewForm = ({
                 </label>
                 <SelectInput
                   id="position"
-                  isLoading={loading}
+                  // isLoading={loading}
                   changeHandler={setUserData}
-                  options={optionsDATA.positions}
+                  options={options.positions}
                   isError={errors.position}
                   value={userData.position}
-                  label={
-                    getLabel(userData.position, optionsDATA.positions)?.name
-                  }
                 />
                 {errors.position && <ErrorSpan text={errors.position} />}
               </div>
@@ -650,14 +535,11 @@ const AddNewForm = ({
                 </label>
                 <SelectInput
                   id="manager"
-                  isLoading={loading}
+                  // isLoading={loading}
                   changeHandler={setUserData}
                   options={managerOptions()}
                   isError={errors.manager}
                   value={userData.manager}
-                  label={
-                    getLabel(userData.manager, optionsDATA.employeesName)?.name
-                  }
                 />
                 {errors.manager && <ErrorSpan text={errors.manager} />}
               </div>
@@ -671,17 +553,14 @@ const AddNewForm = ({
                 </label>
                 <SelectMultiInput
                   id="copied_managers"
-                  isLoading={loading}
+                  // isLoading={loading}
                   changeHandler={setUserData}
-                  options={optionsDATA.employeesName.filter(
+                  options={options.employeesName.filter(
                     (optdata) => optdata.value !== userData.manager
                   )}
                   isError={errors.manager}
                   value={userData.copied_managers}
                   isMulti={true}
-                  // label={
-                  //   getLabel(userData.copied_managers, optionsDATA.employeesName)?.name
-                  // }
                 />
                 {/* {errors.manager && <ErrorSpan text={errors.manager} />} */}
               </div>
@@ -731,7 +610,7 @@ const AddNewForm = ({
                 onSubmit={
                   userDataToEdit.id == undefined
                     ? handleSubmitUpdate
-                    : handleSubmitUpdate
+                    :handleSubmitUpdate 
                 }
                 disable={createUserLoading || updateLoading}
               />

@@ -19,31 +19,21 @@ function App() {
     fetchPolicy: "cache-first"
   });
 
-  // const { setAllEmployees } = useContext(EmployeeContext);
-
   // Change page number
   const pageHandler = (num) => {
     setPageNumber(num);
-    // refetch({first: 16, page: pageNumber,input: ""})
   };
 
   // Change page with arrow
   const pageArrowHandler = (num) => {
     setPageNumber(pageNumber + num);
-    // refetch({first: 16, page: pageNumber,input: ""})
   };
 
   // Search
   const searchHandler = (text) => {
     setSearchText(text);
     setPageNumber(1)
-    // refetch({first: 16, page: pageNumber, input: text})
   };
-
-  useEffect(() => {
-    // data && setAllEmployees(data.company_users.data);
-    // console.log(data);
-  }, [data]);
 
   if (error) return <p>Error: {error.message}</p>;
 
