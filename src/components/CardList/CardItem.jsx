@@ -22,7 +22,7 @@ const CardItem = ({
   searchText,
   pageNumber,
   numOfCard,
-  showModalHandler,
+  openModalHandler,
   addOptions,
 }) => {
   const [showDetails, setShowDetails] = useState(false);
@@ -120,15 +120,7 @@ const CardItem = ({
       });
   };
 
-  const [get_user_id, { loading: loadingUser }] = useLazyQuery(GET_USER_BY_ID);
-  const UpdateUserHandler = async (id) => {
-    const user = await get_user_id({
-      variables: { id, first: 100, includeUser: true },
-      fetchPolicy: "network-only",
-    });
-    addOptions(user);
-    showModalHandler(user.data.user);
-  };
+
   const wrapperRef = useRef(null);
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -158,11 +150,6 @@ const CardItem = ({
           <LoadingSpinner />
         </div>
       )}
-      {loadingUser && (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[10]">
-          <LoadingSpinner />
-        </div>
-      )}
       <div className="grid grid-cols-12">
         <div className="col-start-1 col-end-13 md:col-end-4">
           <div>
@@ -178,7 +165,7 @@ const CardItem = ({
             <div className="flex justify-center gap-10 md:gap-0 md:justify-between items-center text-[#8997a4] text-[14px] mt-[15px] md:mt-[17px] mb-5 md:mb-0">
               <HiPencil
                 className="hover:text-cyan-400 cursor-pointer"
-                onClick={() => UpdateUserHandler(data.id)}
+                onClick={() => openModalHandler(data.id)}
               />
               <AiOutlinePauseCircle className="" />
               <RiDeleteBin2Fill

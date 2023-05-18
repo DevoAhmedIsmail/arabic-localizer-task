@@ -50,15 +50,16 @@ const ListContainer = ({
     });
   };
 
-  const [get_options, { loading: loadingUser }] = useLazyQuery(GET_USER_BY_ID);
+  const [get_options_and_user, { loading: loadingUser }] = useLazyQuery(GET_USER_BY_ID);
 
-  const addNewHandler = async () => {
-    const options = await get_options({
-      variables: { first: 100, includeUser: false },
+  const openModalHandler = async (id) => {
+    const DATA = await get_options_and_user({
+      variables: {id, first: 100, includeUser: id ? true : false },
       fetchPolicy: "network-only",
       onCompleted: ()=>setShowModal(true)
     });
-    addOptions(options);
+    addOptions(DATA);
+    setUserDataToEdit(DATA.data.user || {});
   };
 
   useEffect(() => {
@@ -89,7 +90,7 @@ const ListContainer = ({
           {/* Add new Employee Btn */}
           <button
             className="bg-[#2764ac] text-white w-[100px]  h-[30px] rounded-[5px] font-[Roboto] flex items-center justify-center gap-1"
-            onClick={() => addNewHandler()}
+            onClick={() => openModalHandler()}
           >
             <FaPlus /> <span className="text-[13px]">Add new</span>
           </button>
@@ -103,8 +104,9 @@ const ListContainer = ({
               pageNumber={pageNumber}
               numOfCard={numOfCard}
               searchText={searchText}
-              showModalHandler={showModalHandler}
+              // showModalHandler={showModalHandler}
               addOptions={addOptions}
+              openModalHandler={openModalHandler}
             />
             <Pagination
               paginationInfo={paginationInfo}
