@@ -56,6 +56,7 @@ const AddNewForm = ({
     position_id: userData.position,
     att_profile_id: userData.attendance_profile,
     can_work_home: userData.can_work_home,
+    user_image: selectedImage,
     copied_managers: userData.copied_managers.map((manag) => manag.id),
     has_credentials: 1,
     max_homeDays_per_week: 0,
@@ -67,6 +68,7 @@ const AddNewForm = ({
   const handleImageUpload = (event) => {
     const imageFile = event.target.files[0];
     if (imageFile) {
+      console.log("imageFile: ",imageFile);
       setSelectedImage(imageFile);
       setUserData((prev) => ({
         ...prev,
