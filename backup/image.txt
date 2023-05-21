@@ -1,0 +1,15 @@
+import React from 'react';
+
+const UserImage = ({ name, image }) => {
+  const renderUserImage = () => {
+    if (image) {
+      return <img src={image} alt="User" />;
+    } else {
+      const initials = name.substring(0, 2).toUpperCase();
+      return <div className="initials-image">{initials}</div>;
+    }
+  };
+
+  return <div className="user-image">{renderUserImage()}</div>;
+};
+     
