@@ -2,8 +2,6 @@ import React from "react";
 import { BsArrowLeftSquareFill, BsArrowRightSquareFill } from "react-icons/bs";
 
 const Pagination = ({ paginationInfo, pageHandler, pageArrowHandler, numOfCard }) => {
-  // const {hasMorePages,currentPage,hasMorePages,total} = paginationInfo
-  // console.log("pagination page", paginationInfo);
 
   return (
     <div className="flex justify-center items-center gap-1">
