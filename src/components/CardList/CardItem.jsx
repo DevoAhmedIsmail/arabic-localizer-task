@@ -24,6 +24,7 @@ const CardItem = ({
   numOfCard,
   openModalHandler,
   addOptions,
+  getUrlFromImagePath
 }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
@@ -150,6 +151,9 @@ const CardItem = ({
   }
   const fileReader = new FileReader();
 
+
+
+
   return (
     <div className="card-item bg-white pl-4 pr-3 py-3">
       {LoadingDelete && (
@@ -163,8 +167,8 @@ const CardItem = ({
             {
               data.face?.path ? (
                 <img
-                  src={data.face.path}
-                  // src="C:\wamp64\www\Mawared\public\uploads\1\2\1125\2023_05_18_17_41_54_805_6dhmyD91VMFMueaY7tGufkDLuDRi5wrX4cBRg4KH.png"
+                  src={getUrlFromImagePath(data.face.path)}
+                  // src="http://mawared.pro/uploads/1/2/1128/2023_05_22_15_11_57_709_Ijuvsmhp4hQfbH2qEhaYZKaKpcy8G754kPSUIyik.png"
                   alt="person"
                   className="w-[100px] h-[100px] md:w-[64px] md:h-[64px] rounded-full object-cover mx-auto"
                 />
@@ -302,15 +306,18 @@ const CardItem = ({
                           <p className="text-[#8997a4] text-[10px] font-[Roboto] mb-2  ">
                             Copied Manager
                           </p>
-                          <p
-                            className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px] flex flex-col"
+                          <div className="overflow-auto h-[55px] custom-scroll">
+
+                          <div
+                            className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px] flex flex-col "
                           >
                             {
                               data.copied_managers?.map(copiedManager=>(
-                                <span key={copiedManager.id} className="text-overflow">{copiedManager.name}</span>
+                                <span key={copiedManager.id} className="text-overflow" title={copiedManager.name}>{copiedManager.name}</span>
                               ))
                             }
-                          </p>
+                          </div>
+                          </div>
                         </div>
                         <div className="flex flex-col">
                           <p className="text-[#8997a4] text-[10px] font-[Roboto] mb-2 ">

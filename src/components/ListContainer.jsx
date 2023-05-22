@@ -62,6 +62,16 @@ const ListContainer = ({
     setUserDataToEdit(DATA.data.user || {});
   };
 
+  const getUrlFromImagePath = (img_path)=>{
+    const imgPath = img_path?.split('public');
+    if(imgPath) {
+      const newImagePath = imgPath[1] !== undefined ? "http://mawared.pro/"+imgPath[1] : null;
+      return newImagePath
+    }else {
+      return null
+    }
+  }
+
   useEffect(() => {
     if (showModal) {
       document.body.classList.add("overflow-hidden");
@@ -107,6 +117,7 @@ const ListContainer = ({
               // showModalHandler={showModalHandler}
               addOptions={addOptions}
               openModalHandler={openModalHandler}
+              getUrlFromImagePath={getUrlFromImagePath}
             />
             <Pagination
               paginationInfo={paginationInfo}
@@ -126,6 +137,7 @@ const ListContainer = ({
             updateLoading={searchText}
             addOptions={addOptions}
             options={options}
+            getUrlFromImagePath={getUrlFromImagePath}
           />
         )}
       </div>

@@ -17,10 +17,11 @@ const AddNewForm = ({
   numOfCard,
   searchText,
   options,
+  getUrlFromImagePath
 }) => {
   const initState = {
     name: "",
-    face: {},
+    face: null,
     starts_at: "",
     phone: "",
     email: "",
@@ -36,6 +37,7 @@ const AddNewForm = ({
 
   const [userData, setUserData] = useState(initState);
   const [isSaveForm, setIsSaveForm] = useState(false);
+  const [updateImage, setupdateImage] = useState(false);
   const [errors, setErrors] = useState({});
   const client = useApolloClient();
 
@@ -56,7 +58,6 @@ const AddNewForm = ({
     position_id: userData.position,
     att_profile_id: userData.attendance_profile,
     can_work_home: userData.can_work_home,
-    user_image: selectedImage,
     copied_managers: userData.copied_managers.map((manag) => manag.id),
     has_credentials: 1,
     max_homeDays_per_week: 0,
@@ -66,9 +67,11 @@ const AddNewForm = ({
 
   // Handle Image come from user
   const handleImageUpload = (event) => {
+    
     const imageFile = event.target.files[0];
     if (imageFile) {
-      console.log("imageFile: ",imageFile);
+      // console.log("imageFile: ",imageFile);
+      setupdateImage(true)
       setSelectedImage(imageFile);
       setUserData((prev) => ({
         ...prev,
@@ -131,7 +134,7 @@ const AddNewForm = ({
           console.log(userData);
           const { data } = await updateUserQL({
             variables: {
-              ext: variable,
+              ext: updateImage ? {...variable,user_image: selectedImage } : {...variable}
             },
             onError({ networkError, graphQLErrors }) {
               if (graphQLErrors) {
@@ -144,6 +147,7 @@ const AddNewForm = ({
             onCompleted: (data) => {
               Swal.fire("User Updated!", "", "success");
               setUserData(initState);
+              setupdateImage(false)
               closeModal();
             },
           });
@@ -151,7 +155,7 @@ const AddNewForm = ({
           // Add new User method
           const { data } = await addUserQL({
             variables: {
-              userInput: { ...variable, role_id: userData.role },
+              userInput: { ...variable, role_id: userData.role,user_image: selectedImage  },
               userSalaryInput: {
                 salary_config: {
                   start_at: userData.starts_at,
@@ -258,6 +262,8 @@ const AddNewForm = ({
     e.stopPropagation();
     console.log('delete image');
     setUserData((prev) => ({ ...prev, face: null }));
+    setSelectedImage(null)
+    setupdateImage(true)
   };
 
   const handleInputChange = (e) => {
@@ -294,7 +300,7 @@ const AddNewForm = ({
           <form onSubmit={(e) => handleSubmitUpdate(e)}>
             <ModalTitle text="Personal Info" />
             <div className="grid grid-cols-12 mt-[20px]">
-              <div className="col-start-1 col-end-13 md:col-end-4 relative mb-4">
+              <div className="col-start-1 col-end-13 md:col-end-4 relative mb-4 overflow-hidden">
                 <input
                   id="image-upload"
                   type="file"
@@ -309,7 +315,7 @@ const AddNewForm = ({
 
                 <label htmlFor="image-upload" className="h-[111px] block">
                   <div
-                    className={`box box-drag border-2 border-dashed relative }`}
+                    className={`box box-drag border-2 border-dashed relative cursor-pointer`}
                   >
                     <span
                       className={`text-[13px] font-normal text-center text-[#5c6974] font-[Roboto] tracking-[1.73px] h-full ${
@@ -318,7 +324,7 @@ const AddNewForm = ({
                     >
                       {userData.face ? (
                         <img
-                          src={userData.face.path}
+                          src={getUrlFromImagePath(userData.face.path) || userData.face.path}
                           alt="user"
                           className="w-full h-full object-contain"
                         />
