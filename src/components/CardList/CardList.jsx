@@ -13,7 +13,6 @@ const CardList = ({searchText,pageNumber,numOfCard,addOptions,openModalHandler})
     variables: {first: numOfCard, page: pageNumber,input: searchText}
   })
   
-
   return (
     <div className="py-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-x-[20px] lg:gap-x-[15px] xl:gap-x-[30px] gap-y-[20px] xl:gap-y-[35px]">

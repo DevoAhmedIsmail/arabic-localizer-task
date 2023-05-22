@@ -143,6 +143,13 @@ const CardItem = ({
       setShowName(false);
     }
   }
+
+  const getNameInsteadImage = (name)=>{
+    let nameArr = name.trim().split(" ");
+    return nameArr[0].substring(0,1).concat(nameArr[1]?.substring(0,1) || "")
+  }
+  const fileReader = new FileReader();
+
   return (
     <div className="card-item bg-white pl-4 pr-3 py-3">
       {LoadingDelete && (
@@ -153,15 +160,21 @@ const CardItem = ({
       <div className="grid grid-cols-12">
         <div className="col-start-1 col-end-13 md:col-end-4">
           <div>
-            <img
-              src={
-                data.img_path
-                  ? data.img_path
-                  : "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=600"
-              }
-              alt="person"
-              className="w-[100px] h-[100px] md:w-[64px] md:h-[64px] rounded-full object-cover mx-auto"
-            />
+            {
+              data.face?.path ? (
+                <img
+                  src={data.face.path}
+                  // src="C:\wamp64\www\Mawared\public\uploads\1\2\1125\2023_05_18_17_41_54_805_6dhmyD91VMFMueaY7tGufkDLuDRi5wrX4cBRg4KH.png"
+                  alt="person"
+                  className="w-[100px] h-[100px] md:w-[64px] md:h-[64px] rounded-full object-cover mx-auto"
+                />
+              ):(
+                <div className="w-[100px] h-[100px] md:w-[64px] md:h-[64px] rounded-full mx-auto bg-[#3086c5] flex items-center justify-center text-white font-semibold tracking-widest uppercase">
+                  {getNameInsteadImage(data.name)}
+                </div>
+              )
+            }
+            
             <div className="flex justify-center gap-10 md:gap-0 md:justify-between items-center text-[#8997a4] text-[14px] mt-[15px] md:mt-[17px] mb-5 md:mb-0">
               <HiPencil
                 className="hover:text-cyan-400 cursor-pointer"
@@ -285,15 +298,18 @@ const CardItem = ({
                             {data.position?.name}
                           </p>
                         </div>
-                        <div className="flex flex-col">
+                        <div className="flex flex-col row-span-2">
                           <p className="text-[#8997a4] text-[10px] font-[Roboto] mb-2  ">
                             Copied Manager
                           </p>
                           <p
-                            className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px] text-overflow"
-                            title={data.copied_managers[0]?.name}
+                            className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px] flex flex-col"
                           >
-                            {data.copied_managers[0]?.name}
+                            {
+                              data.copied_managers?.map(copiedManager=>(
+                                <span key={copiedManager.id} className="text-overflow">{copiedManager.name}</span>
+                              ))
+                            }
                           </p>
                         </div>
                         <div className="flex flex-col">

@@ -1,214 +1,131 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
-import ModalTitle from "./ModalTitle";
-import Button from "./Button";
-import { EmployeeContext } from "../context/EmployeeProvider";
-import { SelectInput } from "./Inputs";
-import ErrorSpan from "./ErrorSpan";
-import { MdClose } from "react-icons/md";
-import { GET_ALL_OPTIONS, GET_COMPANY_USERS, UPDATE_USER } from "../graphql";
-import { useApolloClient, useMutation, useQuery } from "@apollo/client";
-import LoadingSpinner from "./LoadingSpinner";
+import React, { useState, useRef, useEffect, useContext } from "react";
+import "./card.css";
+import { HiPencil } from "react-icons/hi";
+import { HiEnvelope } from "react-icons/hi2";
+import { AiOutlinePauseCircle } from "react-icons/ai";
+import { RiDeleteBin2Fill } from "react-icons/ri";
+import { TbExclamationMark } from "react-icons/tb";
+import { MdCallEnd } from "react-icons/md";
+import AttendLabel from "./AttendLabel";
+import Swal from "sweetalert2";
+import {
+  useMutation,
+  useApolloClient,
+  useQuery,
+  useLazyQuery,
+} from "@apollo/client";
+import { DELETE_USER, GET_COMPANY_USERS, GET_USER_BY_ID } from "../../graphql";
+import LoadingSpinner from "../LoadingSpinner";
 
-const AddNewForm = ({
-  closeModal,
-  userDataToEdit,
+const CardItem = ({
+  data,
+  searchText,
   pageNumber,
   numOfCard,
-  searchText,
-  handelLoading
+  openModalHandler,
+  addOptions,
 }) => {
-  const [userData, setUserData] = useState({
-    name: "",
-    img_path: "",
-    starts_at: "",
-    phone: "",
-    email: "",
-    attendance_profile: 0,
-    department: 0,
-    manager: 0,
-    office: 0,
-    position: 0,
-    role: 0,
-    can_work_home: false,
-  });
+  const [showDetails, setShowDetails] = useState(false);
+  const [showEmail, setShowEmail] = useState(false);
+  const [showPhone, setShowPhone] = useState(false);
+  const [showName, setShowName] = useState(false);
+  const client = useApolloClient();
+  const [
+    deleteUserQL,
+    { data: DATADELETE, loading: LoadingDelete, error: ErrorDelete },
+  ] = useMutation(DELETE_USER);
 
-  const [optionsDATA, setOptionsDATA] = useState({
-    departments: [],
-    positions: [],
-    offices: [],
-    attendance_profiles: [],
-    employeesName: [],
-    roles: [],
-  });
+  const deleteHandler = (id) => {
+    const swalWithClasses = Swal.mixin({
+      customClass: {
+        confirmButton: "bg-red-400 px-3 py-2 text-white rounded",
+        cancelButton: "bg-green-400 px-3 py-2 text-white rounded",
+      },
+      buttonsStyling: false,
+    });
 
-  const [isSaveForm, setIsSaveForm] = useState(false);
-  const [errors, setErrors] = useState({});
+    swalWithClasses
+      .fire({
+        title: "Are you sure to Delete?",
+        text: data.name,
+        icon: "warning",
+        showCancelButton: true,
+        // showLoaderOnConfirm: true,
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "No, cancel!",
+        reverseButtons: true,
+      })
+      .then((result) => {
+        if (result.isConfirmed) {
+          const { value: password } = swalWithClasses
+            .fire({
+              title: "Enter your password",
+              input: "password",
+              confirmButtonText: "Delete",
+              inputPlaceholder: "Enter your password",
+              inputAttributes: {
+                maxlength: 10,
+                autocapitalize: "off",
+                autocorrect: "off",
+              },
+            })
+            .then((res) => {
+              // if (res.value === "123456") {
+              deleteUserQL({
+                variables: { id: data.id, password: res.value },
+                refetchQueries: [
+                  {
+                    query: GET_COMPANY_USERS,
+                    variables: {
+                      first: numOfCard,
+                      page: pageNumber,
+                      input: searchText,
+                    },
+                  },
+                ],
 
-  // to store image which come form user
-  const [selectedImage, setSelectedImage] = useState(null);
-
-  // Add Employee to context
-  const { addEmployee } = useContext(EmployeeContext);
-
-  // Validations
-  function validateForm() {
-    let errors = {};
-    if (!userData.name) {
-      errors.name = "Name is required";
-    }
-    if (!userData.email) {
-      errors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(userData.email)) {
-      errors.email = "Email is invalid";
-    }
-    if (!userData.phone) {
-      errors.phone = "Phone is required";
-    } else if (!/^\d{10}$/) {
-      errors.phone = "Phone is invalid";
-    }
-    if (!userData.position) {
-      errors.position = "Position is required";
-    }
-    if (!userData.department) {
-      errors.department = "Department is required";
-    }
-    if (!userData.attendance_profile) {
-      errors.attendance = "Attendance is required";
-    }
-    if (!userData.office) {
-      errors.office = "Office is required";
-    }
-    // if (!userData.role) {
-    //   errors.role = "Role is required";
-    // }
-    if (!userData.starts_at) {
-      errors.startDate = "Start Date is required";
-    }
-    if (!userData.manager) {
-      errors.manager = "Manager is required";
-    }
-
-    setErrors(errors);
-    return Object.keys(errors).length === 0;
-  }
-
-  // Handle Image come from user
-  const handleImageUpload = (event) => {
-    const imageFile = event.target.files[0];
-    if (imageFile) {
-      setSelectedImage(imageFile);
-      setUserData((prev) => ({
-        ...prev,
-        img_path: URL.createObjectURL(imageFile),
-      }));
-    }
-  };
-
-  // Fetch from graphql
-  const { loading, error, data, refetch } = useQuery(GET_ALL_OPTIONS, {
-    variables: { first: 100 },
-    // fetchPolicy: "cache-first"
-  });
-
-  // Push Values to api
-  const [updateUserQL, { loading: updateLoading }] = useMutation(UPDATE_USER);
-
-  // Submit Form
-  function handleSubmit(e) {
-    e.preventDefault();
-    if (validateForm()) {
-      handelLoading(true)
-      // console.log('Form submitted:', { name, email, phone });
-      // Do something with the form data
-      console.log(userData);
-      updateUserQL({
-        variables: {
-          ext: {
-            id: userDataToEdit?.id,
-            name: userData.name,
-            starts_at: userData.starts_at,
-            email: userData.email,
-            phone: userData.phone,
-            department_id: userData.department,
-            manager_id: userData.manager,
-            company_id: userData.office,
-            office_id: userData.office,
-            has_credentials: 0,
-            position_id: userData.position,
-            att_profile_id: userData.attendance_profile,
-            can_work_home: userData.can_work_home,
-            max_homeDays_per_week: 0,
-            flexible_home: 0,
-            can_ex_days: 0,
-            copied_managers: userData.manager,
-          },
-        },
-        refetchQueries: [
-          {
-            query: GET_COMPANY_USERS,
-            variables: {
-              first: numOfCard,
-              page: pageNumber,
-              input: searchText,
-            },
-          },
-        ],
-      }).then(()=>{
-        handelLoading(false)
-      }).catch((error) => {
-        let { graphQLErrors } = error;
-        // if (graphQLErrors[0].extensions.category === "validation") {
-        //   console.log(graphQLErrors[0].extensions.validation);
-        // }
-        console.log(error);
+                onError({ networkError, graphQLErrors }) {
+                  if (graphQLErrors) {
+                    graphQLErrors.map(({ extensions }) =>
+                      swalWithClasses.fire("Error!", extensions.reason, "error")
+                    );
+                  }
+                  if (networkError) {
+                    console.log(" [Network error]:", networkError);
+                  }
+                },
+              })
+                .then((res) => {
+                  // console.log(res);
+                  if (res.data.delete_user.status === "success") {
+                    Swal.fire({
+                      timer: 2000,
+                      title: "The User is deleted",
+                      icon: "success",
+                    });
+                  } else {
+                    swalWithClasses.fire(
+                      "Error!",
+                      res.data.delete_user.message,
+                      "Error"
+                    );
+                  }
+                })
+                .catch((error) => {
+                  console.log(error.extensions);
+                  // swalWithClasses.fire("Error!", error.message, "error");
+                });
+            });
+        }
       });
-
-      closeModal();
-      // setIsSaveForm(false);
-    }
-  }
-
-  // get Label
-  const getLabel = (id, arr) => {
-    return arr.find((ele) => ele.id == id);
   };
+
 
   const wrapperRef = useRef(null);
   useEffect(() => {
-    if (userDataToEdit.id !== undefined) {
-      setUserData({
-        name: userDataToEdit.name,
-        img_path: userDataToEdit.img_path,
-        starts_at: userDataToEdit.starts_at,
-        phone: userDataToEdit.phone,
-        email: userDataToEdit.email,
-        attendance_profile: userDataToEdit.attendance_profile?.id,
-        department: userDataToEdit.department?.id,
-        manager: userDataToEdit.manager?.id,
-        office: userDataToEdit.office?.id,
-        position: userDataToEdit.position?.id,
-        can_work_home: userDataToEdit.can_work_home,
-      });
-    } else {
-      setUserData({
-        name: "",
-        img_path: "",
-        starts_at: "",
-        phone: "",
-        email: "",
-        attendance_profile: "",
-        department: "",
-        manager: "",
-        office: "",
-        position: "",
-        role: "",
-        can_work_home: false,
-      });
-    }
-
     const handleClickOutside = (event) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-        closeModal();
+        setShowDetails(false);
       }
     };
 
@@ -217,377 +134,211 @@ const AddNewForm = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [wrapperRef, userDataToEdit]);
+  }, [wrapperRef]);
 
-  // Cancel Image
-  const cancelImage = (e) => {
-    e.stopPropagation();
-    setUserData((prev) => ({ ...prev, img_path: "" }));
-  };
-
-  useEffect(() => {
-    // console.log('Label: ', getLabel(userData.attendance_profile,optionsDATA.attendance_profiles)?.name);
-    if (typeof data !== "undefined") {
-      setOptionsDATA({
-        departments: data.company_departments.data,
-        offices: data.offices.data,
-        attendance_profiles: data.attendance_profiles.data,
-        positions: data.positions.data,
-        employeesName: data.company_users.data,
-        roles: data.profile.company.currentSubscription.plan.roles,
-      });
-      // console.log(optionsDATA);
+  function isEllipsisActive(e) {
+    if (e.target.offsetWidth < e.target.scrollWidth) {
+      setShowName(true);
+    } else {
+      setShowName(false);
     }
+  }
 
-    if (isSaveForm) {
-      validateForm();
-    }
-  }, [userData, data]);
-
-  const handleInputChange = (e) => {
-    const { target } = e;
-    setUserData((prev) => ({ ...prev, [target.name]: target.value }));
-  };
+  const getNameInsteadImage = (name)=>{
+    let nameArr = name.trim().split(" ");
+    return nameArr[0].substring(0,1).concat(nameArr[1]?.substring(0,1) || "")
+  }
+  const fileReader = new FileReader();
 
   return (
-    <div
-      className="fixed top-0 left-0 w-full min-h-screen z-30 flex justify-center items-center"
-      style={{ backgroundColor: "rgba(40, 104, 174, 0.43)" }}
-    >
-      <div
-        className="bg-white pt-[11px] pb-[0px] p-5 max-h-[100vh] min-h-[710px] md:min-h-[717px] w-[90%] md:w-[700px] lg:w-[1000px] overflow-auto rounded-[4px]"
-        ref={wrapperRef}
-      >
-        <div className="border-b-2 border-[#23aaeb]  pb-3">
-          <p className="text-[#23aaeb] font-[Roboto] text-[18px]">
-            NEW EMPLOYEE
-          </p>
+    <div className="card-item bg-white pl-4 pr-3 py-3">
+      {LoadingDelete && (
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+          <LoadingSpinner />
         </div>
-
-        <div className="">
-          <form onSubmit={(e) => handleSubmit(e)}>
-            <ModalTitle text="Personal Info" />
-            <div className="grid grid-cols-12 mt-[20px]">
-              <div className="col-start-1 col-end-13 md:col-end-4 relative mb-4">
-                <input
-                  id="image-upload"
-                  type="file"
-                  onChange={handleImageUpload}
+      )}
+      <div className="grid grid-cols-12">
+        <div className="col-start-1 col-end-13 md:col-end-4">
+          <div>
+            {
+              data.face?.path ? (
+                <img
+                  src={data.face.path}
+                  // src="C:\wamp64\www\Mawared\public\uploads\1\2\1125\2023_05_18_17_41_54_805_6dhmyD91VMFMueaY7tGufkDLuDRi5wrX4cBRg4KH.png"
+                  alt="person"
+                  className="w-[100px] h-[100px] md:w-[64px] md:h-[64px] rounded-full object-cover mx-auto"
                 />
-                {/* close image */}
-                {userData.img_path && (
-                  <div className="absolute top-2 right-2 font-bold text-red-400 cursor-pointer z-[100] w-5 h-5 bg-white rounded-full flex items-center justify-center">
-                    <MdClose onClick={(e) => cancelImage(e)} />
-                  </div>
-                )}
+              ):(
+                <div className="w-[100px] h-[100px] md:w-[64px] md:h-[64px] rounded-full mx-auto bg-[#3086c5] flex items-center justify-center text-white font-semibold tracking-widest uppercase">
+                  {getNameInsteadImage(data.name)}
+                </div>
+              )
+            }
+            
+            <div className="flex justify-center gap-10 md:gap-0 md:justify-between items-center text-[#8997a4] text-[14px] mt-[15px] md:mt-[17px] mb-5 md:mb-0">
+              <HiPencil
+                className="hover:text-cyan-400 cursor-pointer"
+                onClick={() => openModalHandler(data.id)}
+              />
+              <AiOutlinePauseCircle className="" />
+              <RiDeleteBin2Fill
+                className="hover:text-red-400 cursor-pointer"
+                onClick={() => deleteHandler(data.id)}
+              />
+            </div>
+          </div>
+        </div>
+        {/* flex flex-col justify-between */}
+        <div className="col-start-1 md:col-start-4 col-end-13 pl-0 md:pl-[20px] h-full ">
+          <div className="border-t md:border-t-0 border-l-0 md:border-l border-[#8997a440] h-full pl-0 md:pl-5 ">
+            <div className="text-center md:text-left relative">
+              <p
+                className="text-[20px] text-[#5c6974] font-[Lato] capitalize text-overflow leading-[1] mb-[5px]"
+                onMouseEnter={(e) => isEllipsisActive(e)}
+                onMouseLeave={() => setShowName(false)}
+              >
+                {data.name}
+              </p>
+              {showName && data.name.length > 13 && (
+                <div
+                  className="bg-white shadow absolute top-7 -right-10 w-[240px] point-shape border border-[#eaeef0] z-10 px-1 text-sm"
+                  ref={wrapperRef}
+                >
+                  {data.name}
+                </div>
+              )}
+              <p className="text-[13px] text-[#313030] font-[Roboto] h-[19px]">
+                {data.position?.name}
+              </p>
+              <p className="text-[10px] text-[#5c6974] font-[Roboto] mb-[11px] h-[19px]">
+                {data.department?.name}
+              </p>
+            </div>
+            <div className="flex justify-between items-center mt-[13px]">
+              <AttendLabel text={data.attendance_profile?.name} />
 
-                <label htmlFor="image-upload" className="h-[111px] block">
-                  <div
-                    className={`box box-drag border-2 border-dashed relative }`}
-                  >
-                    <span
-                      className={`text-[13px] font-normal text-center text-[#5c6974] font-[Roboto] tracking-[1.73px] h-full ${
-                        !userData.img_path && "absolute top-[43%] translate-y-0"
-                      }`}
+              <div className="flex items-center gap-2">
+                <div
+                  className="bg-[#eaeef0] w-[19px] h-[19px] rounded-full text-center flex justify-center items-center hover:shadow relative "
+                  onMouseEnter={() => setShowEmail(true)}
+                  onMouseLeave={() => setShowEmail(false)}
+                >
+                  <HiEnvelope className="mx-auto text-[10px]" />
+                  {showEmail && (
+                    <div
+                      className="bg-white shadow absolute top-7 -right-10 w-[240px] point-shape border border-[#eaeef0] z-10"
+                      ref={wrapperRef}
                     >
-                      {userData.img_path ? (
-                        <img
-                          src={userData.img_path}
-                          alt="user"
-                          className="w-full h-full object-contain"
-                        />
-                      ) : (
-                        "DRAG IMAGE HERE"
-                      )}
-                    </span>
-                  </div>
-                </label>
-              </div>
-              {/* Inputs */}
-              <div className="col-start-1 md:col-start-4 col-end-13">
-                <div className="flex justify-between items-center flex-wrap mt-[-4px]">
-                  <div className="w-1/2 flex flex-col px-4 mb-4 relative">
-                    <label
-                      className={`text-[13px] ${
-                        errors.name ? "text-red-400" : "text-[#313030]"
-                      }`}
-                      htmlFor="name"
+                      <div className="grid grid-cols-3 text-left p-1">
+                        <div className="flex flex-col">
+                          <p className="text-[#8997a4] text-[10px] font-[Roboto] mb-2 ">
+                            Email
+                          </p>
+                          <p className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px]">
+                            {data.email}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div
+                  className="bg-[#eaeef0] w-[19px] h-[19px] rounded-full text-center flex justify-center items-center hover:shadow relative"
+                  onMouseEnter={() => setShowPhone(true)}
+                  onMouseLeave={() => setShowPhone(false)}
+                >
+                  <MdCallEnd className="mx-auto text-[10px]" />
+                  {showPhone && (
+                    <div
+                      className="bg-white shadow absolute top-7 -right-10 w-[240px] point-shape border border-[#eaeef0] z-10"
+                      ref={wrapperRef}
                     >
-                      Name
-                    </label>
-                    <input
-                      id="name"
-                      className={`border ${
-                        errors.name ? "border-red-400" : "border-[#aaaaaad6]"
-                      }  focus:outline-[#aaaaaad6] h-[30px] px-3 text-[13px] rounded`}
-                      value={userData.name}
-                      name="name"
-                      onChange={handleInputChange}
-                    />
-                    {errors.name && <ErrorSpan text={errors.name} />}
-                  </div>
-                  <div className="w-1/2 flex flex-col px-4 mb-4 relative">
-                    <label
-                      htmlFor="starts_at"
-                      className={`text-[13px] ${
-                        errors.startDate ? "text-red-400" : "text-[#313030]"
-                      }`}
+                      <div className="grid grid-cols-3 text-left p-1">
+                        <div className="flex flex-col">
+                          <p className="text-[#8997a4] text-[10px] font-[Roboto] mb-2 ">
+                            Phone
+                          </p>
+                          <p className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px]">
+                            {data.phone}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div
+                  className={`bg-[#eaeef0] w-[19px] h-[19px] rounded-full text-center ${
+                    showDetails && "details-shadow"
+                  }  hover:shadow cursor-pointer relative flex justify-center items-center`}
+                  onMouseEnter={() => setShowDetails(true)}
+                  onMouseLeave={() => setShowDetails(false)}
+
+                  // onClick={() => setShowDetails(!showDetails)}
+                >
+                  <TbExclamationMark className="mx-auto text-[10px]" />
+                  {showDetails && (
+                    <div
+                      className="bg-white shadow absolute top-7 -right-10 w-[240px] point-shape border border-[#eaeef0] z-10"
+                      ref={wrapperRef}
                     >
-                      Start Date
-                    </label>
-                    <input
-                      id="starts_at"
-                      name="starts_at"
-                      type="date"
-                      className={`border ${
-                        errors.startDate
-                          ? "border-red-400"
-                          : "border-[#aaaaaad6]"
-                      }  focus:outline-[#aaaaaad6] h-[30px] px-3 text-[13px] rounded`}
-                      value={userData.starts_at}
-                      onChange={handleInputChange}
-                    />
-                    {errors.startDate && <ErrorSpan text={errors.startDate} />}
-                  </div>
-                  <div className="w-1/2 flex flex-col px-4 mb-4 relative">
-                    <label
-                      htmlFor="phone"
-                      className={`text-[13px] ${
-                        errors.phone ? "text-red-400" : "text-[#313030]"
-                      }`}
-                    >
-                      Phone
-                    </label>
-                    <input
-                      id="phone"
-                      name="phone"
-                      className={`border ${
-                        errors.phone ? "border-red-400" : "border-[#aaaaaad6]"
-                      }  focus:outline-[#aaaaaad6] h-[30px] px-3 text-[13px] rounded`}
-                      value={userData.phone}
-                      onChange={handleInputChange}
-                    />
-                    {errors.phone && <ErrorSpan text={errors.phone} />}
-                  </div>
-                  <div className="w-1/2 flex flex-col px-4 mb-4 relative">
-                    <label
-                      htmlFor="email"
-                      className={`text-[13px] ${
-                        errors.email ? "text-red-400" : "text-[#313030]"
-                      }`}
-                    >
-                      Email
-                    </label>
-                    <input
-                      id="email"
-                      name="email"
-                      placeholder="Email"
-                      className={`border ${
-                        errors.email ? "border-red-400" : "border-[#aaaaaad6]"
-                      }  focus:outline-[#aaaaaad6] h-[30px] px-3 text-[13px] rounded`}
-                      value={userData.email}
-                      onChange={handleInputChange}
-                    />
-                    {errors.email && <ErrorSpan text={errors.email} />}
-                  </div>
+                      <div className="grid grid-cols-3 text-left p-1">
+                        <div className="flex flex-col">
+                          <p className="text-[#8997a4] text-[10px] font-[Roboto] mb-2 ">
+                            Office
+                          </p>
+                          <p className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px] text-overflow">
+                            {data.office?.name}
+                          </p>
+                        </div>
+                        <div className="flex flex-col">
+                          <p className="text-[#8997a4] text-[10px] font-[Roboto] mb-2 ">
+                            Role
+                          </p>
+                          <p className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px]">
+                            {data.position?.name}
+                          </p>
+                        </div>
+                        <div className="flex flex-col">
+                          <p className="text-[#8997a4] text-[10px] font-[Roboto] mb-2  ">
+                            Copied Manager
+                          </p>
+                          <p
+                            className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px] text-overflow"
+                            title={data.copied_managers[0]?.name}
+                          >
+                            {data.copied_managers[0]?.name}
+                          </p>
+                        </div>
+                        <div className="flex flex-col">
+                          <p className="text-[#8997a4] text-[10px] font-[Roboto] mb-2 ">
+                            Joining Date
+                          </p>
+                          <p className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px]">
+                            {data.starts_at}
+                          </p>
+                        </div>
+                        <div className="flex flex-col">
+                          <p className="text-[#8997a4] text-[10px] font-[Roboto] mb-2 ">
+                            Manager
+                          </p>
+                          <p
+                            className="text-[#313030] text-[10px] font-[Roboto] -mt-[5px] text-overflow"
+                            title={data.manager?.name}
+                          >
+                            {data.manager?.name}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-              {/* End Inputs */}
             </div>
-
-            <ModalTitle text="Office Info" />
-
-            {/* Inputs */}
-            <div className="flex justify-between items-center flex-wrap">
-              <div className="w-full flex flex-col  mb-4 relative">
-                <label
-                  className={`text-[13px] ${
-                    errors.office ? "text-red-400" : "text-[#313030]"
-                  }`}
-                  htmlFor="office"
-                >
-                  Office
-                </label>
-                <SelectInput
-                  id="office"
-                  changeHandler={setUserData}
-                  options={optionsDATA.offices}
-                  isError={errors.office}
-                  value={userData.office.id}
-                  label={getLabel(userData.office, optionsDATA.offices)?.name}
-                  isLoading={loading}
-                />
-                {errors.office && <ErrorSpan text={errors.office} />}
-              </div>
-
-              <div className="w-1/2 flex flex-col  mb-4 relative">
-                <label
-                  htmlFor="department"
-                  className={`text-[13px] ${
-                    errors.department ? "text-red-400" : "text-[#313030]"
-                  }`}
-                >
-                  Department
-                </label>
-                <SelectInput
-                  id="department"
-                  isLoading={loading}
-                  changeHandler={setUserData}
-                  options={optionsDATA.departments}
-                  isError={errors.department}
-                  value={userData.department}
-                  label={
-                    getLabel(userData.department, optionsDATA.departments)?.name
-                  }
-                />
-                {errors.department && <ErrorSpan text={errors.department} />}
-              </div>
-
-              <div className="w-1/2 flex flex-col pl-[32px] mb-4 relative">
-                <label
-                  className={`text-[13px] ${
-                    errors.attendance ? "text-red-400" : "text-[#313030]"
-                  }`}
-                  htmlFor="attendance_profile"
-                >
-                  Attendance Profile
-                </label>
-                <SelectInput
-                  id="attendance_profile"
-                  isLoading={loading}
-                  changeHandler={setUserData}
-                  options={optionsDATA.attendance_profiles}
-                  isError={errors.attendance}
-                  value={userData.attendance_profile}
-                  label={
-                    getLabel(
-                      userData.attendance_profile,
-                      optionsDATA.attendance_profiles
-                    )?.name
-                  }
-                />
-                {errors.attendance && <ErrorSpan text={errors.attendance} />}
-              </div>
-
-              <div className="w-1/2 flex flex-col  mb-4 relative">
-                <label
-                  className={`text-[13px] ${
-                    errors.role ? "text-red-400" : "text-[#313030]"
-                  }`}
-                  htmlFor="role"
-                >
-                  Role
-                </label>
-                <SelectInput
-                  id="role"
-                  isLoading={loading}
-                  changeHandler={setUserData}
-                  options={optionsDATA.roles}
-                  isError={errors.role}
-                  value={userData.role}
-                  label={getLabel(userData.role, optionsDATA.roles)?.name}
-                />
-                {errors.role && <ErrorSpan text={errors.role} />}
-              </div>
-
-              <div className="w-1/2 flex flex-col pl-[32px] mb-4 relative">
-                <label
-                  className={`text-[13px] ${
-                    errors.position ? "text-red-400" : "text-[#313030]"
-                  }`}
-                  htmlFor="position"
-                >
-                  Position
-                </label>
-                <SelectInput
-                  id="position"
-                  isLoading={loading}
-                  changeHandler={setUserData}
-                  options={optionsDATA.positions}
-                  isError={errors.position}
-                  value={userData.position}
-                  label={
-                    getLabel(userData.position, optionsDATA.positions)?.name
-                  }
-                />
-                {errors.position && <ErrorSpan text={errors.position} />}
-              </div>
-
-              <div className="w-1/2 flex flex-col relative">
-                <label
-                  className={`text-[13px] ${
-                    errors.manager ? "text-red-400" : "text-[#313030]"
-                  }`}
-                  htmlFor="manager"
-                >
-                  Direct Manager
-                </label>
-                <SelectInput
-                  id="manager"
-                  isLoading={loading}
-                  changeHandler={setUserData}
-                  options={optionsDATA.employeesName}
-                  isError={errors.manager}
-                  value={userData.manager}
-                  label={
-                    getLabel(userData.manager, optionsDATA.employeesName)?.name
-                  }
-                />
-                {errors.manager && <ErrorSpan text={errors.manager} />}
-              </div>
-            </div>
-            {/* End Inputs */}
-
-            <ModalTitle text="Work From Home" />
-
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="allow"
-                checked={userData.can_work_home}
-                onChange={(e) =>
-                  setUserData((prev) => ({
-                    ...prev,
-                    can_work_home: !prev.can_work_home,
-                  }))
-                }
-              />
-              <label
-                className={`text-[13px] ${
-                  userData.can_work_home && "font-bold"
-                } text-[#313030]`}
-                htmlFor="allow"
-              >
-                Allow Employee To Work From Home
-              </label>
-            </div>
-
-            <div className="bg-[#d2d2d2] block w-full h-[0.5px] mt-5 mb-2"></div>
-
-            <div className="flex justify-end gap-3 mt-[15px]">
-              <button
-                className={` text-white w-[94px] h-[27px] rounded-[5px] font-[Roboto] bg-[#ff6a6a] text-[13px] `}
-                onClick={closeModal}
-              >
-                Cancel
-              </button>
-              <Button
-                text={`${userDataToEdit.id == undefined ? "Save" : "Update"}`}
-                color="#23aaeb"
-                fontSize="13px"
-                onSubmit={handleSubmit}
-              />
-            </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default AddNewForm;
-
-
-
-
-
+export default CardItem;

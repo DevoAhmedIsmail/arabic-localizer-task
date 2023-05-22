@@ -20,16 +20,16 @@ const AddNewForm = ({
 }) => {
   const initState = {
     name: "",
-    img_path: "",
+    face: {},
     starts_at: "",
     phone: "",
     email: "",
-    attendance_profile: 0,
-    department: 0,
-    manager: 0,
+    attendance_profile: {},
+    department: {},
+    manager: {},
     copied_managers: [],
-    office: 0,
-    position: 0,
+    office: {},
+    position: {},
     role: 0,
     can_work_home: 0,
   };
@@ -72,7 +72,7 @@ const AddNewForm = ({
       setSelectedImage(imageFile);
       setUserData((prev) => ({
         ...prev,
-        img_path: URL.createObjectURL(imageFile),
+        face: {path: URL.createObjectURL(imageFile)},
       }));
     }
   };
@@ -207,7 +207,7 @@ const AddNewForm = ({
     if (userDataToEdit.id !== undefined) {
       const {
         name,
-        img_path,
+        face,
         starts_at,
         phone,
         email,
@@ -223,7 +223,7 @@ const AddNewForm = ({
       setUserData({
         ...initState,
         name,
-        img_path,
+        face,
         starts_at,
         phone,
         email,
@@ -256,7 +256,8 @@ const AddNewForm = ({
   // Cancel Image
   const cancelImage = (e) => {
     e.stopPropagation();
-    setUserData((prev) => ({ ...prev, img_path: "" }));
+    console.log('delete image');
+    setUserData((prev) => ({ ...prev, face: null }));
   };
 
   const handleInputChange = (e) => {
@@ -300,7 +301,7 @@ const AddNewForm = ({
                   onChange={handleImageUpload}
                 />
                 {/* close image */}
-                {userData.img_path && (
+                {userData.face && (
                   <div className="absolute top-2 right-2 font-bold text-red-400 cursor-pointer z-[100] w-5 h-5 bg-white rounded-full flex items-center justify-center">
                     <MdClose onClick={(e) => cancelImage(e)} />
                   </div>
@@ -312,12 +313,12 @@ const AddNewForm = ({
                   >
                     <span
                       className={`text-[13px] font-normal text-center text-[#5c6974] font-[Roboto] tracking-[1.73px] h-full ${
-                        !userData.img_path && "absolute top-[43%] translate-y-0"
+                        !userData.face && "absolute top-[43%] translate-y-0"
                       }`}
                     >
-                      {userData.img_path ? (
+                      {userData.face ? (
                         <img
-                          src={userData.img_path}
+                          src={userData.face.path}
                           alt="user"
                           className="w-full h-full object-contain"
                         />

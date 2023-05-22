@@ -6,7 +6,9 @@ export const GET_COMPANY_USERS = gql`
       data {
         id
         name
-        img_path
+        face {
+          path
+        }
         starts_at
         phone
         email
@@ -52,7 +54,9 @@ export const GET_USER_BY_ID = gql`
     user(id: $id) @include(if: $includeUser) {
       id
       name
-      img_path
+      face {
+        path
+      }
       starts_at
       phone
       email
@@ -241,7 +245,9 @@ export const UPDATE_USER = gql`
   update_user(input: { user_input: $ext }) {
     id
       name
-      img_path
+      face {
+        path
+      }
       starts_at
       phone
       email
@@ -284,7 +290,9 @@ export const ADD_USER = gql`
   ) {
         id
         name
-        img_path
+        face {
+          path
+        }
         starts_at
         phone
         email
