@@ -1,13 +1,12 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {  useEffect, useRef, useState } from "react";
 import ModalTitle from "./ModalTitle";
 import Button from "./Button";
-import { EmployeeContext } from "../context/EmployeeProvider";
 import { SelectInput, SelectMultiInput } from "./Inputs";
 import ErrorSpan from "./ErrorSpan";
 import { MdClose } from "react-icons/md";
 import Swal from "sweetalert2";
 import { ADD_USER, GET_COMPANY_USERS, UPDATE_USER } from "../graphql";
-import { useApolloClient, useMutation } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import LoadingSpinner from "./LoadingSpinner";
 
 const AddNewForm = ({
@@ -36,10 +35,8 @@ const AddNewForm = ({
   };
 
   const [userData, setUserData] = useState(initState);
-  const [isSaveForm, setIsSaveForm] = useState(false);
   const [updateImage, setupdateImage] = useState(false);
   const [errors, setErrors] = useState({});
-  const client = useApolloClient();
 
   // to store image which come form user
   const [selectedImage, setSelectedImage] = useState(null);
@@ -132,7 +129,7 @@ const AddNewForm = ({
         // Update method
         if (userDataToEdit.id !== undefined) {
           console.log(userData);
-          const { data } = await updateUserQL({
+          await updateUserQL({
             variables: {
               ext: updateImage ? {...variable,user_image: selectedImage } : {...variable}
             },
@@ -153,7 +150,7 @@ const AddNewForm = ({
           });
         } else {
           // Add new User method
-          const { data } = await addUserQL({
+           await addUserQL({
             variables: {
               userInput: { ...variable, role_id: userData.role,user_image: selectedImage  },
               userSalaryInput: {
@@ -188,7 +185,6 @@ const AddNewForm = ({
           });
         }
       } catch (error) {
-        let { graphQLErrors } = error;
         console.log(error);
         // Swal.fire("Error!", error.message, "error");
       }
@@ -491,7 +487,7 @@ const AddNewForm = ({
                 {errors.attendance && <ErrorSpan text={errors.attendance} />}
               </div>
 
-              {userDataToEdit.id == undefined && (
+              {userDataToEdit.id === undefined && (
                 <div className="flex flex-col  mb-4 relative">
                   <label
                     className={`text-[13px] ${
@@ -613,11 +609,11 @@ const AddNewForm = ({
                 Cancel
               </button>
               <Button
-                text={`${userDataToEdit.id == undefined ? "Save" : "Update"}`}
+                text={`${userDataToEdit.id === undefined ? "Save" : "Update"}`}
                 color="#23aaeb"
                 fontSize="13px"
                 onSubmit={
-                  userDataToEdit.id == undefined
+                  userDataToEdit.id === undefined
                     ? handleSubmitUpdate
                     :handleSubmitUpdate 
                 }

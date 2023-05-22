@@ -325,7 +325,7 @@ export const ADD_USER = gql`
 }
 `;
 
-/* 
+/* 🚀🚀🚀🚀🚀🚀🚀🚀🚀
 
     TODO GET USER ✔️
     TODO GET Roles from company>>currentSubscription>>plan>>roles ✔️
@@ -336,5 +336,5 @@ export const ADD_USER = gql`
     TODO GET direct manager from users name ✔️
     TODO DELETE USER ✔️
     TODO UPDATE USER ✔️
-    TODO Add USER 🚀
+    TODO Add USER ✔️
  */
